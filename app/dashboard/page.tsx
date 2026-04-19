@@ -20,15 +20,71 @@ export const metadata = {
   }
 };
 
+type DashboardSearchParams = Record<string, string | string[] | undefined>;
+
 const shortAddress = (address?: string) => {
   if (!address) return '';
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 };
 
-export default async function DashboardPage({ searchParams }: { searchParams?: Promise<Record<string, string>> }) {
+function readSearchParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function decodeSearchParam(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function getAuthError(params?: DashboardSearchParams): { title: string; detail?: string } | null {
+  const error = decodeSearchParam(readSearchParam(params?.error));
+  const detail = decodeSearchParam(readSearchParam(params?.detail));
+
+  if (!error) return null;
+
+  if (error === 'config_missing' && detail === 'missing_x_client_secret') {
+    return {
+      title: 'X OAuth is not configured for this deployment.',
+      detail: 'Add X_CLIENT_SECRET to the environment and redeploy before trying Connect X again.',
+    };
+  }
+
+  if (error === 'config_missing' && detail === 'missing_or_invalid_x_client_secret') {
+    return {
+      title: 'X rejected the token exchange for this deployment.',
+      detail: 'The X client secret is missing or invalid in the deployed environment.',
+    };
+  }
+
+  if (error === 'config_missing' && detail === 'missing_auth_secret') {
+    return {
+      title: 'Session signing is not configured for this deployment.',
+      detail: 'Add X_AUTH_SECRET to the environment and redeploy before trying Connect X again.',
+    };
+  }
+
+  if (error === 'oauth_state' && detail === 'cookie_mismatch') {
+    return {
+      title: 'The X login session expired before the callback completed.',
+      detail: 'Try Connect X again in the same browser tab.',
+    };
+  }
+
+  return {
+    title: error.replace(/_/g, ' '),
+    detail: detail?.replace(/_/g, ' '),
+  };
+}
+
+export default async function DashboardPage({ searchParams }: { searchParams?: Promise<DashboardSearchParams> }) {
   const cookieStore = await cookies();
   const session = getSessionCookie(cookieStore);
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const authError = getAuthError(resolvedSearchParams);
 
   if (!session) {
     return (
@@ -63,6 +119,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
               <h1>Connect your X account</h1>
               <p>Sign in to manage your agent key and wallet for @barterpayments mentions.</p>
             </div>
+            {authError ? (
+              <div className="card" style={{ maxWidth: 720, marginBottom: 24, borderColor: 'rgba(255, 120, 120, 0.25)', background: 'rgba(255, 64, 64, 0.08)' }}>
+                <strong>{authError.title}</strong>
+                {authError.detail ? (
+                  <p className="muted" style={{ marginTop: 10 }}>{authError.detail}</p>
+                ) : null}
+              </div>
+            ) : null}
             <div className="card" style={{ maxWidth: 520 }}>
               <h4>Sign in with X</h4>
               <p>Connect your X account to claim your agent ID. You’ll create your API key and wallet next.</p>
@@ -178,13 +242,16 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
             ) : null}
           </div>
 
-          {resolvedSearchParams?.error ? (
+          {authError ? (
             <div className="card" style={{ borderColor: 'rgba(255, 0, 0, 0.2)', background: 'rgba(255, 0, 0, 0.04)' }}>
-              <strong>Error:</strong> {decodeURIComponent(resolvedSearchParams.error)}
+              <strong>{authError.title}</strong>
+              {authError.detail ? (
+                <p className="muted" style={{ marginTop: 10 }}>{authError.detail}</p>
+              ) : null}
             </div>
           ) : null}
 
-          <StatusBanner status={resolvedSearchParams?.status} />
+          <StatusBanner status={readSearchParam(resolvedSearchParams?.status)} />
 
           <div className="page-grid">
             <div className="card">

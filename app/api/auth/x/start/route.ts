@@ -1,13 +1,30 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { generateCodeChallenge, generateCodeVerifier, generateState } from '../../../../_lib/xAuth';
+import {
+  generateCodeChallenge,
+  generateCodeVerifier,
+  generateState,
+  xClientRequiresSecret,
+} from '../../../../_lib/xAuth';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || url.origin;
+  const redirectTo = (path: string) => NextResponse.redirect(new URL(path, baseUrl));
   const clientId = process.env.X_CLIENT_ID;
+  const clientSecret = process.env.X_CLIENT_SECRET;
   const redirectUri = process.env.X_REDIRECT_URI;
 
   if (!clientId || !redirectUri) {
-    return NextResponse.json({ error: 'X_CLIENT_ID or X_REDIRECT_URI missing' }, { status: 500 });
+    return redirectTo('/dashboard?error=config_missing&detail=check_x_oauth_env');
+  }
+
+  if (!process.env.X_AUTH_SECRET) {
+    return redirectTo('/dashboard?error=config_missing&detail=missing_auth_secret');
+  }
+
+  if (xClientRequiresSecret(clientId) && !clientSecret) {
+    return redirectTo('/dashboard?error=config_missing&detail=missing_x_client_secret');
   }
 
   const state = generateState();

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { setSessionCookie } from '../../../../_lib/session';
+import { xClientRequiresSecret } from '../../../../_lib/xAuth';
 import { getUserByXId, upsertUser } from '../../../../_lib/xUserStore';
 
 export async function GET(req: Request) {
@@ -13,12 +14,14 @@ export async function GET(req: Request) {
   const clientId = process.env.X_CLIENT_ID;
   const clientSecret = process.env.X_CLIENT_SECRET;
   const redirectUri = process.env.X_REDIRECT_URI;
+  const requiresClientSecret = clientId ? xClientRequiresSecret(clientId) : false;
 
   console.log('[Auth] Callback received', {
     hasCode: !!code,
     hasState: !!state,
     hasClientId: !!clientId,
     hasClientSecret: !!clientSecret,
+    requiresClientSecret,
     hasRedirectUri: !!redirectUri,
     redirectUri,
     hasAuthSecret: !!process.env.X_AUTH_SECRET,
@@ -40,6 +43,11 @@ export async function GET(req: Request) {
   if (!process.env.X_AUTH_SECRET) {
     console.error('[Auth] X_AUTH_SECRET is not set');
     return redirectTo('/dashboard?error=config_missing&detail=missing_auth_secret');
+  }
+
+  if (requiresClientSecret && !clientSecret) {
+    console.error('[Auth] X client is confidential but X_CLIENT_SECRET is missing');
+    return redirectTo('/dashboard?error=config_missing&detail=missing_x_client_secret');
   }
 
   const cookieStore = await cookies();
@@ -94,6 +102,18 @@ export async function GET(req: Request) {
   console.log('[Auth] Token exchange response', { status: tokenRes.status, body: tokenText });
 
   if (!tokenRes.ok) {
+    try {
+      const tokenError = JSON.parse(tokenText) as { error?: string; error_description?: string };
+      if (
+        tokenError.error === 'unauthorized_client' &&
+        /authorization header/i.test(tokenError.error_description || '')
+      ) {
+        return redirectTo('/dashboard?error=config_missing&detail=missing_or_invalid_x_client_secret');
+      }
+    } catch {
+      // Keep the original token failure path when the provider body is not JSON.
+    }
+
     const detail = encodeURIComponent(tokenText.slice(0, 200));
     return redirectTo(`/dashboard?error=token_failed&detail=${detail}`);
   }

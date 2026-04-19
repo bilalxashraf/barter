@@ -13,6 +13,15 @@ export function generateCodeChallenge(verifier: string): string {
   return base64Url(hash);
 }
 
+export function xClientRequiresSecret(clientId: string): boolean {
+  try {
+    const decoded = Buffer.from(clientId, 'base64url').toString('utf8');
+    return decoded.endsWith(':ci');
+  } catch {
+    return false;
+  }
+}
+
 function base64Url(buffer: Buffer): string {
   return buffer
     .toString('base64')
