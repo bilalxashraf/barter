@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { XMentionsPayload } from "../_lib/xMentions";
+import type { XPostsPayload } from "../_lib/xMentions";
 
 const compactNumberFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   maximumFractionDigits: 1,
 });
-const MENTIONS_REFRESH_INTERVAL_MS = 60000;
+const POSTS_REFRESH_INTERVAL_MS = 60000;
 
 function formatTimestamp(value: string | null) {
   if (!value) return "Recent";
@@ -18,7 +18,7 @@ function formatTimestamp(value: string | null) {
   }).format(new Date(value));
 }
 
-function MentionMetric({
+function PostMetric({
   label,
   value,
 }: {
@@ -33,23 +33,23 @@ function MentionMetric({
   );
 }
 
-export default function XMentionsFeed() {
-  const [payload, setPayload] = useState<XMentionsPayload | null>(null);
+export default function XPostsFeed() {
+  const [payload, setPayload] = useState<XPostsPayload | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
 
-    async function loadMentions() {
+    async function loadPosts() {
       try {
-        const response = await fetch("/api/x/mentions", {
+        const response = await fetch("/api/x/posts", {
           cache: "no-store",
           credentials: "same-origin",
         });
 
         if (!response.ok) return;
 
-        const data = (await response.json()) as XMentionsPayload;
+        const data = (await response.json()) as XPostsPayload;
 
         if (active) {
           setPayload(data);
@@ -63,17 +63,17 @@ export default function XMentionsFeed() {
       }
     }
 
-    void loadMentions();
+    void loadPosts();
 
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
-        void loadMentions();
+        void loadPosts();
       }
-    }, MENTIONS_REFRESH_INTERVAL_MS);
+    }, POSTS_REFRESH_INTERVAL_MS);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        void loadMentions();
+        void loadPosts();
       }
     };
 
@@ -89,9 +89,9 @@ export default function XMentionsFeed() {
   if (loading) {
     return (
       <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-6 min-h-[520px]">
-        <div className="text-xs uppercase tracking-[0.18em] text-white/40 mb-4">Mentions</div>
+        <div className="text-xs uppercase tracking-[0.18em] text-white/40 mb-4">Latest posts</div>
         <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, index) => (
+          {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
               className="rounded-2xl border border-white/[0.06] bg-black/30 p-4 animate-pulse"
@@ -106,93 +106,93 @@ export default function XMentionsFeed() {
     );
   }
 
-  if (!payload || payload.mentions.length === 0) {
+  if (!payload || payload.posts.length === 0) {
     return (
-      <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-6 min-h-[520px] flex h-full flex-col justify-between">
+      <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-6 min-h-[520px] flex flex-col justify-between">
         <div>
-          <div className="text-xs uppercase tracking-[0.18em] text-white/40 mb-3">Mentions</div>
+          <div className="text-xs uppercase tracking-[0.18em] text-white/40 mb-3">Latest posts</div>
           <h3 className="text-lg font-semibold text-white mb-3">
-            See public posts that mention @{payload?.username ?? "barterpayments"}
+            Follow @{payload?.username ?? "barterpayments"} on X
           </h3>
           <p className="text-sm text-white/35 leading-relaxed">
-            Open X live search to browse replies, shout-outs, and public discussion that references the account in real time.
+            Open the profile to see the latest public updates, product notes, and rollout progress from the Barter account.
           </p>
         </div>
         <a
-          href={payload?.searchUrl ?? "https://x.com/search?q=%40barterpayments&src=typed_query&f=live"}
+          href={payload?.profileUrl ?? "https://x.com/barterpayments"}
           target="_blank"
           rel="noreferrer"
           className="mt-6 inline-flex items-center justify-center rounded-2xl border border-white/10 px-5 py-3 text-sm text-white/70 hover:border-white/20 hover:text-white transition-all"
         >
-          Browse mentions on X →
+          Open @barterpayments →
         </a>
       </div>
     );
   }
 
   return (
-    <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-6 min-h-[520px] h-full">
+    <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-6 min-h-[520px]">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <div className="text-xs uppercase tracking-[0.18em] text-white/40 mb-2">Mentions</div>
+          <div className="text-xs uppercase tracking-[0.18em] text-white/40 mb-2">Latest posts</div>
           <h3 className="text-lg font-semibold text-white">
-            Recent public mentions
+            Recent updates from @{payload.username}
           </h3>
         </div>
         <a
-          href={payload.searchUrl}
+          href={payload.profileUrl}
           target="_blank"
           rel="noreferrer"
           className="text-xs text-white/45 hover:text-white transition-colors whitespace-nowrap"
         >
-          Open live search →
+          Open profile →
         </a>
       </div>
 
       <div className="space-y-3">
-        {payload.mentions.map((mention) => (
+        {payload.posts.map((post) => (
           <a
-            key={mention.id}
-            href={mention.url}
+            key={post.id}
+            href={post.url}
             target="_blank"
             rel="noreferrer"
             className="block rounded-2xl border border-white/[0.06] bg-black/30 p-4 hover:border-white/15 transition-all"
           >
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-3 min-w-0">
-                {mention.author.avatarUrl ? (
+                {post.author.avatarUrl ? (
                   <img
-                    src={mention.author.avatarUrl}
-                    alt={mention.author.name}
+                    src={post.author.avatarUrl}
+                    alt={post.author.name}
                     className="h-9 w-9 rounded-full object-cover"
                   />
                 ) : (
                   <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-xs font-semibold text-white/60">
-                    {mention.author.name.slice(0, 1).toUpperCase()}
+                    {post.author.name.slice(0, 1).toUpperCase()}
                   </div>
                 )}
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium text-white">
-                    {mention.author.name}
+                    {post.author.name}
                   </div>
                   <div className="truncate text-xs text-white/35">
-                    @{mention.author.username}
+                    @{post.author.username}
                   </div>
                 </div>
               </div>
               <div className="text-[11px] text-white/30 shrink-0">
-                {formatTimestamp(mention.createdAt)}
+                {formatTimestamp(post.createdAt)}
               </div>
             </div>
 
             <p className="text-sm leading-relaxed text-white/75 whitespace-pre-line line-clamp-4">
-              {mention.text}
+              {post.text}
             </p>
 
             <div className="mt-3 flex flex-wrap gap-3">
-              <MentionMetric label="likes" value={mention.metrics.likes} />
-              <MentionMetric label="replies" value={mention.metrics.replies} />
-              <MentionMetric label="reposts" value={mention.metrics.reposts} />
+              <PostMetric label="likes" value={post.metrics.likes} />
+              <PostMetric label="replies" value={post.metrics.replies} />
+              <PostMetric label="reposts" value={post.metrics.reposts} />
             </div>
           </a>
         ))}

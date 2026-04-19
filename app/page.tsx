@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import XTimelineEmbed from "./components/XTimelineEmbed";
 import XMentionsFeed from "./components/XMentionsFeed";
+import XPostsFeed from "./components/XPostsFeed";
 import type { SiteMetrics } from "./_lib/siteMetrics.types";
 
 const numberFormatter = new Intl.NumberFormat("en-US");
@@ -235,17 +235,17 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white overflow-x-hidden">
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-5 max-w-5xl mx-auto border-b border-white/[0.06]">
-        <div className="flex items-center gap-2">
+      <nav className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 max-w-5xl mx-auto border-b border-white/[0.06] gap-4">
+        <div className="flex items-center gap-3 shrink-0">
           <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center text-[10px] font-black text-black">
             B
           </div>
           <span className="font-semibold text-sm tracking-tight">Barter</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end flex-1">
           <button
             onClick={() => setModalOpen(true)}
-            className="rounded-full bg-white text-black px-4 py-1.5 text-xs font-semibold hover:bg-white/90 transition-all"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-white text-black px-5 sm:px-6 py-2.5 text-sm font-semibold hover:bg-white/90 transition-all"
           >
             Join waitlist
           </button>
@@ -280,8 +280,8 @@ export default function Home() {
             </button>
           </div>
 
-          <p className="mt-6 text-white/20 text-xs">
-            Trusted by engineers at OpenAI, Stripe, Razorpay &amp; more
+          <p className="mt-6 text-white/30 text-xs tracking-[0.08em] uppercase">
+            Top 15 at India&apos;s first OpenCode hackathon
           </p>
         </section>
 
@@ -335,19 +335,19 @@ export default function Home() {
 
         {/* Social proof */}
         <section className="pb-24">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
             <div>
               <h2 className="text-xl font-semibold mb-2">Posts and mentions on X</h2>
               <p className="text-white/30 text-sm">
                 Latest posts from @barterpayments, plus a live X search for public mentions of the account.
               </p>
             </div>
-            <div className="flex flex-col items-start sm:items-end gap-2 text-sm">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm sm:justify-end sm:max-w-[320px]">
               <a
                 href={X_PROFILE_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="text-white/45 hover:text-white transition-colors"
+                className="text-white/45 hover:text-white transition-colors whitespace-nowrap"
               >
                 Open @barterpayments →
               </a>
@@ -355,16 +355,14 @@ export default function Home() {
                 href={X_MENTIONS_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="text-white/45 hover:text-white transition-colors"
+                className="text-white/45 hover:text-white transition-colors whitespace-nowrap"
               >
                 Open live mentions →
               </a>
             </div>
           </div>
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.95fr)]">
-            <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-3 sm:p-4">
-              <XTimelineEmbed />
-            </div>
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] items-stretch">
+            <XPostsFeed />
             <XMentionsFeed />
           </div>
         </section>
