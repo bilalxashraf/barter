@@ -286,14 +286,14 @@ export default function Home() {
         </section>
 
         <section className="pb-20">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-5">
-            <div>
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start mb-5">
+            <div className="max-w-[48ch]">
               <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-white/65">Live metrics</h2>
               <p className="text-white/30 text-sm mt-2">
-                Live counters for traffic, waitlist demand, connected X accounts, and wallets created during the beta.
+                Live counters for visits, waitlist signups, connected X accounts, and Solana wallets.
               </p>
             </div>
-            <p className="text-white/20 text-xs sm:text-right">
+            <p className="text-white/20 text-xs sm:text-right whitespace-nowrap leading-none pt-1">
               {metrics ? `Updated ${new Date(metrics.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Loading live counters…"}
             </p>
           </div>
@@ -335,35 +335,37 @@ export default function Home() {
 
         {/* Social proof */}
         <section className="pb-24">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
-            <div>
+          <div className="max-w-[920px] mx-auto">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8">
+            <div className="max-w-[560px]">
               <h2 className="text-xl font-semibold mb-2">Posts and mentions on X</h2>
               <p className="text-white/30 text-sm">
                 Latest posts from @barterpayments, plus a live X search for public mentions of the account.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm sm:justify-end sm:max-w-[320px]">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs uppercase tracking-[0.16em] text-white/35 sm:justify-end">
               <a
                 href={X_PROFILE_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="text-white/45 hover:text-white transition-colors whitespace-nowrap"
+                className="hover:text-white transition-colors whitespace-nowrap"
               >
-                Open @barterpayments →
+                Profile →
               </a>
               <a
                 href={X_MENTIONS_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="text-white/45 hover:text-white transition-colors whitespace-nowrap"
+                className="hover:text-white transition-colors whitespace-nowrap"
               >
-                Open live mentions →
+                Mentions →
               </a>
             </div>
           </div>
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] items-stretch">
+          <div className="grid gap-4 lg:grid-cols-2 items-start">
             <XPostsFeed />
             <XMentionsFeed />
+          </div>
           </div>
         </section>
 
