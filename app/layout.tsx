@@ -69,21 +69,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     '@type': 'WebSite',
     name: 'Barter Payments',
     url: 'https://barterpayments.xyz',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: 'https://barterpayments.xyz/home?q={search_term_string}',
-      'query-input': 'required name=search_term_string',
-    },
   };
 
   const softwareSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Barter Payments Agent API',
+    name: 'Barter Payments',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Cloud',
     url: 'https://barterpayments.xyz',
-    description: 'Agentic onchain infrastructure enabling autonomous swaps, transfers, and wallet orchestration.',
+    description: 'Private beta for agentic payments infrastructure. Join the waitlist for early access.',
     offers: {
       '@type': 'Offer',
       price: '0',

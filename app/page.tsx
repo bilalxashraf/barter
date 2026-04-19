@@ -207,12 +207,6 @@ export default function Home() {
           <span className="font-semibold text-sm tracking-tight">Barter</span>
         </div>
         <div className="flex items-center gap-2">
-          <a
-            href="/home"
-            className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/50 hover:text-white hover:border-white/25 transition-all"
-          >
-            Explore
-          </a>
           <button
             onClick={() => setModalOpen(true)}
             className="rounded-full bg-white text-black px-4 py-1.5 text-xs font-semibold hover:bg-white/90 transition-all"
@@ -248,12 +242,6 @@ export default function Home() {
             >
               Get early access →
             </button>
-            <a
-              href="/home"
-              className="w-full sm:w-auto rounded-2xl border border-white/10 px-8 py-3.5 text-sm text-white/50 hover:border-white/20 hover:text-white/80 transition-all text-center"
-            >
-              Explore →
-            </a>
           </div>
 
           <p className="mt-6 text-white/20 text-xs">
