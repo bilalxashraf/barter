@@ -18,7 +18,7 @@ export type WalletBalanceResponse = {
 };
 
 function getBaseUrl() {
-  return process.env.AGENT_API_BASE_URL || 'https://api.barterpayments.xyz';
+  return process.env.AGENT_API_BASE_URL || 'https://api.ignotusai.xyz';
 }
 
 export async function POST(req: NextRequest) {

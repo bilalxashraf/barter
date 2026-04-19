@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const res = await fetch(`${process.env.AGENT_API_BASE_URL || 'https://api.barterpayments.xyz'}/agent/wallets/${session.agentId}/list`, {
+    const res = await fetch(`${process.env.AGENT_API_BASE_URL || 'https://api.ignotusai.xyz'}/agent/wallets/${session.agentId}/list`, {
       headers: { 'X-API-Key': apiKey }
     });
     if (!res.ok) {

@@ -204,7 +204,7 @@ just type naturally and i'll handle the rest.`,
         throw new Error(`no ${chain} wallet selected. please select a wallet from the dropdown.`);
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_AGENT_API_BASE_URL || 'https://api.barterpayments.xyz';
+      const baseUrl = process.env.NEXT_PUBLIC_AGENT_API_BASE_URL || 'https://api.ignotusai.xyz';
 
       console.log('Sending request:', {
         url: `${baseUrl}${endpoint}`,

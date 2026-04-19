@@ -9,7 +9,7 @@ export function getMarketplaceApiBaseUrl() {
     return 'http://localhost:4010';
   }
 
-  return 'https://api.barterpayments.xyz';
+  return 'https://api.ignotusai.xyz';
 }
 
 export async function toJsonResponse(upstream: Response) {

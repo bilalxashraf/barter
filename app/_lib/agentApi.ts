@@ -31,10 +31,10 @@ function getBaseUrl() {
   // Use NEXT_PUBLIC_ prefix for client-side access
   if (typeof window !== 'undefined') {
     // Client-side
-    return process.env.NEXT_PUBLIC_AGENT_API_BASE_URL || 'https://api.barterpayments.xyz';
+    return process.env.NEXT_PUBLIC_AGENT_API_BASE_URL || 'https://api.ignotusai.xyz';
   }
   // Server-side
-  return process.env.AGENT_API_BASE_URL || 'https://api.barterpayments.xyz';
+  return process.env.AGENT_API_BASE_URL || 'https://api.ignotusai.xyz';
 }
 
 export async function createAgentKey(agentId: string): Promise<AgentKeyResponse> {

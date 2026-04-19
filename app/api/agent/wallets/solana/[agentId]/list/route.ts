@@ -19,7 +19,7 @@ export async function GET(
   }
 
   const apiBaseUrl = process.env.AGENT_API_BASE_URL ||
-    (process.env.NODE_ENV !== 'production' ? 'http://localhost:4010' : 'https://api.barterpayments.xyz');
+    (process.env.NODE_ENV !== 'production' ? 'http://localhost:4010' : 'https://api.ignotusai.xyz');
 
   try {
     const upstream = await fetch(
