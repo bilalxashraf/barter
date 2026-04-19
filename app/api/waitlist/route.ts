@@ -1,32 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
+import { put, head } from "@vercel/blob";
+import { promises as fs } from "fs";
+import path from "path";
 
-const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
-const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const BLOB_NAME = "waitlist.txt";
+const LOCAL_FILE = path.join(process.cwd(), "waitlist.txt");
+const IS_VERCEL = !!process.env.VERCEL;
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-async function redisCommand(command: string[]): Promise<unknown> {
-  const res = await fetch(`${REDIS_URL}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${REDIS_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(command),
-  });
-  if (!res.ok) throw new Error(`Redis error: ${res.status}`);
-  const json = await res.json();
-  return json.result;
+async function readEmails(): Promise<string[]> {
+  if (IS_VERCEL) {
+    try {
+      const existing = await head(BLOB_NAME);
+      const res = await fetch(existing.url);
+      const text = await res.text();
+      return text.split("\n").map((l) => l.split("\t")[0].trim()).filter(Boolean);
+    } catch {
+      return [];
+    }
+  } else {
+    try {
+      const text = await fs.readFile(LOCAL_FILE, "utf8");
+      return text.split("\n").map((l) => l.split("\t")[0].trim()).filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
+}
+
+async function appendEmail(email: string, emails: string[]): Promise<void> {
+  const timestamp = new Date().toISOString();
+  const line = `${email}\t${timestamp}\n`;
+
+  if (IS_VERCEL) {
+    const allEmails = [...emails, email];
+    const content = allEmails.map((e) => `${e}\t${timestamp}`).join("\n") + "\n";
+    await put(BLOB_NAME, content, { access: "public", allowOverwrite: true });
+  } else {
+    await fs.appendFile(LOCAL_FILE, line, "utf8");
+  }
 }
 
 export async function POST(req: NextRequest) {
-  if (!REDIS_URL || !REDIS_TOKEN) {
-    console.error("Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN");
-    return NextResponse.json({ error: "Server misconfigured." }, { status: 500 });
-  }
-
   let body: { email?: string };
   try {
     body = await req.json();
@@ -41,16 +59,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // SADD returns 1 if added, 0 if already existed — handles deduplication atomically
-    const added = await redisCommand(["SADD", "waitlist", email]);
+    const emails = await readEmails();
 
-    if (added === 0) {
+    if (emails.includes(email)) {
       return NextResponse.json({ message: "Already on the waitlist!" });
     }
 
-    // Store join timestamp in a hash for reference
-    await redisCommand(["HSET", "waitlist:timestamps", email, new Date().toISOString()]);
-
+    await appendEmail(email, emails);
     return NextResponse.json({ message: "You're on the waitlist!" });
   } catch (err) {
     console.error("Waitlist save error:", err);
