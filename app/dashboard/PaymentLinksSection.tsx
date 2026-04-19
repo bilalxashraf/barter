@@ -137,7 +137,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
                 type="text"
                 value={createdLink.url}
                 readOnly
-                style={{ flex: 1, padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)' }}
+                style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', fontSize: '0.88rem' }}
               />
               <CopyButton value={createdLink.url} label="Copy" />
             </div>
@@ -163,7 +163,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
               <select
                 value={formData.chain}
                 onChange={(e) => setFormData({ ...formData, chain: e.target.value })}
-                style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)' }}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', fontSize: '0.88rem' }}
                 required
               >
                 <option value="base">Base</option>
@@ -184,7 +184,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
                 value={formData.token}
                 onChange={(e) => setFormData({ ...formData, token: e.target.value })}
                 placeholder="USDC"
-                style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)' }}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', fontSize: '0.88rem' }}
                 required
               />
             </div>
@@ -198,7 +198,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 placeholder="10"
-                style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)' }}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', fontSize: '0.88rem' }}
                 required
               />
             </div>
@@ -212,7 +212,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Payment for services"
-                style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)' }}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', fontSize: '0.88rem' }}
               />
             </div>
 
@@ -223,7 +223,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
               <select
                 value={formData.expiresIn}
                 onChange={(e) => setFormData({ ...formData, expiresIn: parseInt(e.target.value) })}
-                style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)' }}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', fontSize: '0.88rem' }}
               >
                 <option value={3600}>1 hour</option>
                 <option value={86400}>24 hours</option>
@@ -240,7 +240,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
                 <select
                   value={formData.recipientWalletNo || ''}
                   onChange={(e) => setFormData({ ...formData, recipientWalletNo: e.target.value ? parseInt(e.target.value) : undefined })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)' }}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: '#111', color: '#fff', fontSize: '0.88rem' }}
                 >
                   <option value="">Default Wallet</option>
                   {allWallets.map(w => (

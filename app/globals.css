@@ -3086,20 +3086,46 @@ body:has(.dashboard) {
 .dashboard .footer { background: #000; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 .dashboard .footer-inner strong { color: rgba(255, 255, 255, 0.6); }
 
-/* Inputs */
+/* Labels */
+.dashboard label { color: #fff; font-size: 0.88rem; }
+
+/* All inputs, selects, textareas */
+.dashboard input,
 .dashboard input[type="text"],
 .dashboard input[type="email"],
+.dashboard input[type="number"],
+.dashboard input[type="tel"],
+.dashboard input[type="date"],
+.dashboard input[type="checkbox"],
 .dashboard textarea,
 .dashboard select {
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: #111 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
   font-size: 0.9rem;
+  -webkit-appearance: none;
+  appearance: none;
 }
-.dashboard input::placeholder { color: rgba(255, 255, 255, 0.35); }
-.dashboard input:focus {
-  border-color: rgba(255, 255, 255, 0.4);
+.dashboard input::placeholder,
+.dashboard textarea::placeholder { color: rgba(255, 255, 255, 0.35) !important; }
+.dashboard input:focus,
+.dashboard textarea:focus,
+.dashboard select:focus {
+  border-color: rgba(255, 255, 255, 0.4) !important;
   outline: none;
+}
+
+/* Select option backgrounds */
+.dashboard select option {
+  background: #111;
+  color: #fff;
+}
+
+/* Checkbox */
+.dashboard input[type="checkbox"] {
+  accent-color: #fff;
+  width: 16px;
+  height: 16px;
 }
 
 /* Wallet & misc */
@@ -3151,3 +3177,67 @@ body:has(.dashboard) {
   color: rgba(255, 255, 255, 0.8);
 }
 .dashboard .chat-example-button:hover { border-color: rgba(255,255,255,0.3); color: #fff; background: #1a1a1a; }
+
+/* ── Marketplace / CardsSection / PaymentLinksSection overrides ── */
+.dashboard [class*="marketplace-"] {
+  background: #0d0d0d !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.dashboard .marketplace-field span,
+.dashboard .marketplace-field label {
+  color: rgba(255,255,255,0.75) !important;
+}
+
+.dashboard .marketplace-field input,
+.dashboard .marketplace-field textarea,
+.dashboard .marketplace-field select {
+  background: #111 !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.dashboard .marketplace-field input:focus,
+.dashboard .marketplace-field textarea:focus,
+.dashboard .marketplace-field select:focus {
+  border-color: rgba(255,255,255,0.4) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.dashboard .marketplace-field input::placeholder,
+.dashboard .marketplace-field textarea::placeholder {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+.dashboard [class*="marketplace-"] h2,
+.dashboard [class*="marketplace-"] h3,
+.dashboard [class*="marketplace-"] h4,
+.dashboard [class*="marketplace-"] strong,
+.dashboard [class*="marketplace-"] p,
+.dashboard [class*="marketplace-"] span,
+.dashboard [class*="marketplace-"] li {
+  color: #fff !important;
+}
+
+.dashboard [class*="marketplace-"] p:not([class]),
+.dashboard [class*="marketplace-"] .muted {
+  color: rgba(255,255,255,0.65) !important;
+}
+
+.dashboard .marketplace-field-grid { gap: 12px; }
+
+/* wallet-header used in PaymentLinksSection */
+.dashboard .wallet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.dashboard .wallet-header h4 { color: #fff; margin: 0; }
+.dashboard .wallet-header p  { color: rgba(255,255,255,0.6); margin: 0; font-size: 0.85rem; }
