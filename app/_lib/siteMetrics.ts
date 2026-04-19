@@ -1,11 +1,11 @@
 import crypto from "crypto";
-import { head, list, put } from "@vercel/blob";
 import { promises as fs } from "fs";
 import path from "path";
+import { cloudCount, cloudObjectExists, cloudReadText, cloudWriteText, getCloudStoreKind } from "./cloudStore";
 import type { SiteMetrics } from "./siteMetrics.types";
 import { listUsers } from "./xUserStore";
 
-const IS_VERCEL = !!process.env.VERCEL;
+const CLOUD_STORE = getCloudStoreKind();
 const DATA_DIR = path.join(process.cwd(), ".data");
 const LOCAL_METRICS_FILE = path.join(DATA_DIR, "site-metrics.json");
 const LOCAL_VISITOR_DIR = path.join(DATA_DIR, "visitors");
@@ -59,12 +59,11 @@ function normalizeMetrics(value: Partial<SiteMetrics> | null, waitlistCount = 0)
 }
 
 async function readStoredMetrics(): Promise<SiteMetrics | null> {
-  if (IS_VERCEL) {
+  if (CLOUD_STORE) {
     try {
-      const existing = await head(METRICS_BLOB_NAME);
-      const res = await fetch(existing.url, { cache: "no-store" });
-      if (!res.ok) return null;
-      const json = (await res.json()) as Partial<SiteMetrics>;
+      const text = await cloudReadText(METRICS_BLOB_NAME);
+      if (!text) return null;
+      const json = JSON.parse(text) as Partial<SiteMetrics>;
       return normalizeMetrics(json);
     } catch {
       return null;
@@ -81,11 +80,8 @@ async function readStoredMetrics(): Promise<SiteMetrics | null> {
 }
 
 async function writeStoredMetrics(metrics: SiteMetrics): Promise<void> {
-  if (IS_VERCEL) {
-    await put(METRICS_BLOB_NAME, JSON.stringify(metrics), {
-      access: "public",
-      addRandomSuffix: false,
-      allowOverwrite: true,
+  if (CLOUD_STORE) {
+    await cloudWriteText(METRICS_BLOB_NAME, JSON.stringify(metrics), {
       contentType: "application/json",
     });
     return;
@@ -95,24 +91,14 @@ async function writeStoredMetrics(metrics: SiteMetrics): Promise<void> {
   await fs.writeFile(LOCAL_METRICS_FILE, JSON.stringify(metrics, null, 2), "utf8");
 }
 
-async function countBlobEntries(prefix: string): Promise<number> {
-  let count = 0;
-  let cursor: string | undefined;
-  let hasMore = true;
-
-  while (hasMore) {
-    const result = await list({ prefix, cursor });
-    count += result.blobs.length;
-    cursor = result.cursor;
-    hasMore = result.hasMore;
-  }
-
-  return count;
-}
-
 async function countWaitlistEntries(): Promise<number> {
-  if (IS_VERCEL) {
-    return countBlobEntries(WAITLIST_PREFIX);
+  if (CLOUD_STORE) {
+    try {
+      return await cloudCount(WAITLIST_PREFIX);
+    } catch (error) {
+      console.error("Waitlist metrics count error:", error);
+      return 0;
+    }
   }
 
   try {
@@ -129,10 +115,9 @@ async function countWaitlistEntries(): Promise<number> {
 async function hasSeenVisitor(visitorId: string): Promise<boolean> {
   const visitorPath = `${VISITOR_PREFIX}${visitorId}.json`;
 
-  if (IS_VERCEL) {
+  if (CLOUD_STORE) {
     try {
-      await head(visitorPath);
-      return true;
+      return await cloudObjectExists(visitorPath);
     } catch {
       return false;
     }
@@ -151,11 +136,8 @@ async function markVisitorSeen(visitorId: string) {
   const visitorPath = `${VISITOR_PREFIX}${visitorId}.json`;
   const payload = JSON.stringify({ firstSeenAt: new Date().toISOString() });
 
-  if (IS_VERCEL) {
-    await put(visitorPath, payload, {
-      access: "public",
-      addRandomSuffix: false,
-      allowOverwrite: true,
+  if (CLOUD_STORE) {
+    await cloudWriteText(visitorPath, payload, {
       contentType: "application/json",
     });
     return;
@@ -204,7 +186,11 @@ export async function getSiteMetrics(): Promise<SiteMetrics> {
       ...next,
       updatedAt: new Date().toISOString(),
     };
-    await writeStoredMetrics(refreshed);
+    try {
+      await writeStoredMetrics(refreshed);
+    } catch (error) {
+      console.error("Metrics refresh write error:", error);
+    }
     return refreshed;
   }
 
@@ -244,7 +230,11 @@ export async function recordVisit({
 
   const isUniqueVisitor = !(await hasSeenVisitor(resolvedVisitorId));
   if (isUniqueVisitor) {
-    await markVisitorSeen(resolvedVisitorId);
+    try {
+      await markVisitorSeen(resolvedVisitorId);
+    } catch (error) {
+      console.error("Visitor tracking write error:", error);
+    }
   }
 
   const next: SiteMetrics = {
@@ -254,7 +244,11 @@ export async function recordVisit({
     updatedAt: new Date().toISOString(),
   };
 
-  await writeStoredMetrics(next);
+  try {
+    await writeStoredMetrics(next);
+  } catch (error) {
+    console.error("Metrics visit write error:", error);
+  }
 
   return {
     metrics: next,
