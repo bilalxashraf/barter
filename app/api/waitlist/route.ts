@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { put, list } from "@vercel/blob";
 import { promises as fs } from "fs";
 import path from "path";
+import { getSiteMetrics, refreshWaitlistCount } from "../../_lib/siteMetrics";
 
 const LOCAL_FILE = path.join(process.cwd(), "waitlist.txt");
 const IS_VERCEL = !!process.env.VERCEL;
@@ -56,10 +57,12 @@ export async function POST(req: NextRequest) {
 
   try {
     if (await emailExists(email)) {
-      return NextResponse.json({ message: "Already on the waitlist!" });
+      const metrics = await getSiteMetrics();
+      return NextResponse.json({ message: "Already on the waitlist!", metrics });
     }
     await saveEmail(email);
-    return NextResponse.json({ message: "You're on the waitlist!" });
+    const metrics = await refreshWaitlistCount();
+    return NextResponse.json({ message: "You're on the waitlist!", metrics });
   } catch (err) {
     console.error("Waitlist save error:", err);
     return NextResponse.json({ error: "Failed to save. Please try again." }, { status: 500 });

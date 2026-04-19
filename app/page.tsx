@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { SiteMetrics } from "./_lib/siteMetrics.types";
 
 const SOCIAL_POSTS = [
   {
@@ -40,7 +41,15 @@ const SOCIAL_POSTS = [
   },
 ];
 
-function WaitlistModal({ onClose }: { onClose: () => void }) {
+const numberFormatter = new Intl.NumberFormat("en-US");
+
+function WaitlistModal({
+  onClose,
+  onMetricsChange,
+}: {
+  onClose: () => void;
+  onMetricsChange: (metrics: SiteMetrics) => void;
+}) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -61,6 +70,9 @@ function WaitlistModal({ onClose }: { onClose: () => void }) {
         setErrorMsg(data.error || "Something went wrong.");
         setStatus("error");
       } else {
+        if (data.metrics) {
+          onMetricsChange(data.metrics as SiteMetrics);
+        }
         setStatus("success");
       }
     } catch {
@@ -159,6 +171,64 @@ function SocialCard({ post }: { post: (typeof SOCIAL_POSTS)[0] }) {
 
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [metrics, setMetrics] = useState<SiteMetrics | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadMetrics() {
+      try {
+        const hasTrackedVisit = sessionStorage.getItem("barter:visit-tracked") === "1";
+        const res = await fetch("/api/metrics", {
+          method: hasTrackedVisit ? "GET" : "POST",
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+
+        if (!res.ok) return;
+
+        const data = (await res.json()) as { metrics?: SiteMetrics };
+        if (!active || !data.metrics) return;
+
+        if (!hasTrackedVisit) {
+          sessionStorage.setItem("barter:visit-tracked", "1");
+        }
+
+        setMetrics(data.metrics);
+      } catch {
+        // no-op
+      }
+    }
+
+    loadMetrics();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const metricCards = [
+    {
+      value: metrics ? numberFormatter.format(metrics.totalVisits) : "—",
+      label: "real page visits",
+    },
+    {
+      value: metrics ? numberFormatter.format(metrics.uniqueVisitors) : "—",
+      label: "unique visitors",
+    },
+    {
+      value: metrics ? numberFormatter.format(metrics.waitlistCount) : "—",
+      label: "waitlist signups",
+    },
+    {
+      value: metrics ? numberFormatter.format(metrics.connectedXCount) : "—",
+      label: "x accounts connected",
+    },
+    {
+      value: metrics ? numberFormatter.format(metrics.solanaWalletUsersCount) : "—",
+      label: "users with solana wallets",
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -224,6 +294,29 @@ export default function Home() {
           <p className="mt-6 text-white/20 text-xs">
             Trusted by engineers at OpenAI, Stripe, Razorpay &amp; more
           </p>
+        </section>
+
+        <section className="pb-12">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+            <div>
+              <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-white/65">Live metrics</h2>
+              <p className="text-white/30 text-sm mt-2">
+                Real counters from actual visits and waitlist signups.
+              </p>
+            </div>
+            <p className="text-white/20 text-xs">
+              {metrics ? `Updated ${new Date(metrics.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Loading live counters…"}
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {metricCards.map((metric) => (
+              <div key={metric.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6">
+                <div className="text-3xl font-black text-white">{metric.value}</div>
+                <div className="text-white/30 text-xs mt-2 uppercase tracking-[0.16em]">{metric.label}</div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Stats */}
@@ -314,7 +407,12 @@ export default function Home() {
         </div>
       </footer>
 
-      {modalOpen && <WaitlistModal onClose={() => setModalOpen(false)} />}
+      {modalOpen && (
+        <WaitlistModal
+          onClose={() => setModalOpen(false)}
+          onMetricsChange={setMetrics}
+        />
+      )}
     </main>
   );
 }
