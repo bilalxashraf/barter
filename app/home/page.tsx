@@ -284,10 +284,6 @@ export default function HomePage() {
         <div className="container footer-inner">
           <strong>Barter Payments</strong>
           <nav className="footer-links">
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-            <a href="/legal/privacy">Privacy</a>
-            <a href="/legal/terms">Terms</a>
           </nav>
         </div>
       </footer>

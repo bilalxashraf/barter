@@ -58,7 +58,6 @@ export default async function ChatPage() {
             </div>
             <nav className="nav-links">
               <a href="/dashboard">Dashboard</a>
-              <a href="/about">About</a>
             </nav>
             <div className="nav-actions">
               <a className="nav-social" href="https://x.com/barterpayments" target="_blank" rel="noreferrer" aria-label="Barter Payments on X">
