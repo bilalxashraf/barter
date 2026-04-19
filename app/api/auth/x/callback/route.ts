@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { setSessionCookie } from '../../../../_lib/session';
-import { xClientRequiresSecret } from '../../../../_lib/xAuth';
+import { buildXBasicAuthHeader, xClientRequiresSecret } from '../../../../_lib/xAuth';
 import { getUserByXId, upsertUser } from '../../../../_lib/xUserStore';
 
 export async function GET(req: Request) {
@@ -68,18 +68,20 @@ export async function GET(req: Request) {
   const tokenBody = new URLSearchParams({
     code,
     grant_type: 'authorization_code',
-    client_id: clientId,
     redirect_uri: redirectUri,
     code_verifier: verifier,
   });
+
+  if (!clientSecret) {
+    tokenBody.set('client_id', clientId);
+  }
 
   const tokenHeaders: Record<string, string> = {
     'Content-Type': 'application/x-www-form-urlencoded',
   };
 
   if (clientSecret) {
-    const basic = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-    tokenHeaders.Authorization = `Basic ${basic}`;
+    tokenHeaders.Authorization = buildXBasicAuthHeader(clientId, clientSecret);
   } else {
     console.warn('[Auth] X_CLIENT_SECRET not set — token exchange may fail for confidential apps');
   }

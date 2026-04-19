@@ -22,6 +22,18 @@ export function xClientRequiresSecret(clientId: string): boolean {
   }
 }
 
+export function buildXBasicAuthHeader(clientId: string, clientSecret: string): string {
+  const encodedClientId = formUrlEncode(clientId);
+  const encodedClientSecret = formUrlEncode(clientSecret);
+  const basic = Buffer.from(`${encodedClientId}:${encodedClientSecret}`).toString('base64');
+  return `Basic ${basic}`;
+}
+
+function formUrlEncode(value: string): string {
+  const params = new URLSearchParams({ value });
+  return params.toString().slice('value='.length);
+}
+
 function base64Url(buffer: Buffer): string {
   return buffer
     .toString('base64')
