@@ -53,8 +53,8 @@ const S = {
   row:     { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 } as React.CSSProperties,
   mono:    { fontFamily: 'monospace', fontSize: '0.88rem', color: '#fff', wordBreak: 'break-all' as const },
   muted:   { fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginTop: 4, lineHeight: 1.5 } as React.CSSProperties,
-  btnW:    { background: '#fff', color: '#000', border: 'none', borderRadius: 10, padding: '9px 20px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
-  btnO:    { background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 10, padding: '8px 18px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
+  btnW:    { background: '#fff', color: '#000', border: '1px solid #fff', borderRadius: 10, padding: '9px 20px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
+  btnO:    { background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.45)', borderRadius: 10, padding: '8px 18px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
   divider: { borderTop: '1px solid rgba(255,255,255,0.08)', margin: '18px 0' } as React.CSSProperties,
   tag:     { display: 'inline-block', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 99, padding: '3px 12px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)', fontWeight: 500 } as React.CSSProperties,
 };

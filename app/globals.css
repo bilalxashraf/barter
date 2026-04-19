@@ -3069,19 +3069,26 @@ body:has(.dashboard) {
 .dashboard .button.primary {
   background: #fff;
   color: #000;
-  border: none;
+  border: 1px solid #fff;
   font-weight: 700;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.dashboard .button.primary:hover { background: #e5e5e5; }
+.dashboard .button.primary:hover {
+  background: #000;
+  color: #fff;
+  border-color: #fff;
+}
 .dashboard .button.secondary {
   background: transparent;
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
 }
 .dashboard .button.secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: #fff;
+  color: #000;
+  border-color: #fff;
 }
 
 /* Hero */
