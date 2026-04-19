@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import XTimelineEmbed from "./components/XTimelineEmbed";
+import XMentionsFeed from "./components/XMentionsFeed";
 import type { SiteMetrics } from "./_lib/siteMetrics.types";
 
 const numberFormatter = new Intl.NumberFormat("en-US");
 const METRICS_REFRESH_INTERVAL_MS = 15000;
+const X_PROFILE_URL = "https://x.com/barterpayments";
+const X_MENTIONS_URL = "https://x.com/search?q=%40barterpayments&src=typed_query&f=live";
 
 function WaitlistModal({
   onClose,
@@ -195,6 +198,54 @@ export default function Home() {
     },
   ];
 
+  const summaryCards = [
+    {
+      value: metrics ? numberFormatter.format(metrics.waitlistCount) : "—",
+      label: "waitlist signups",
+    },
+    {
+      value: metrics ? numberFormatter.format(metrics.connectedXCount) : "—",
+      label: "private beta accounts",
+    },
+    {
+      value: metrics ? numberFormatter.format(metrics.solanaWalletUsersCount) : "—",
+      label: "wallets provisioned",
+    },
+  ];
+
+  const capabilityCards = [
+    {
+      icon: "✳",
+      title: "Waitlist-first rollout",
+      desc: "The public site is focused on signup capture and real demand signals while access stays controlled.",
+    },
+    {
+      icon: "𝕏",
+      title: "X-linked onboarding",
+      desc: "Private beta accounts are tied to an X handle so early users can be onboarded with a recognizable identity.",
+    },
+    {
+      icon: "◎",
+      title: "Wallet provisioning",
+      desc: "Beta users can provision a Solana wallet and get set up for payment testing without exposing the full app publicly.",
+    },
+    {
+      icon: "↗",
+      title: "Payment links",
+      desc: "Inbound payment link flows are part of the private beta so early users can test receiving crypto payments.",
+    },
+    {
+      icon: "◌",
+      title: "Real product signals",
+      desc: "The landing page counters are tied to actual visits, waitlist signups, connected accounts, and wallets.",
+    },
+    {
+      icon: "◼",
+      title: "Controlled access",
+      desc: "The public deployment stays focused on the waitlist while the product stack evolves behind the scenes.",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden">
 
@@ -275,11 +326,7 @@ export default function Home() {
         {/* Stats */}
         <section className="pb-20">
           <div className="grid grid-cols-3 divide-x divide-white/[0.06] border border-white/[0.06] rounded-2xl overflow-hidden">
-            {[
-              { value: "40ms", label: "avg settlement" },
-              { value: "180+", label: "currencies" },
-              { value: "99.99%", label: "uptime SLA" },
-            ].map((s) => (
+            {summaryCards.map((s) => (
               <div key={s.label} className="py-8 text-center">
                 <div className="text-2xl font-black text-white">{s.value}</div>
                 <div className="text-white/30 text-xs mt-1">{s.label}</div>
@@ -290,19 +337,12 @@ export default function Home() {
 
         {/* Features */}
         <section className="pb-24">
-          <h2 className="text-xl font-semibold mb-2">Built for the agentic era</h2>
+          <h2 className="text-xl font-semibold mb-2">What the private beta includes</h2>
           <p className="text-white/30 text-sm mb-8">
-            AI agents need a payment layer that matches their speed and autonomy.
+            Barter is currently focused on early onboarding, wallet setup, and payment primitives for a controlled beta rollout.
           </p>
           <div className="grid sm:grid-cols-3 gap-3">
-            {[
-              { icon: "⚡", title: "Instant settlement", desc: "Sub-100ms rails so your agent never waits." },
-              { icon: "🤝", title: "Agent-to-agent", desc: "Programmatic negotiation between AI systems." },
-              { icon: "🔒", title: "Spending limits", desc: "Cap per transaction, category, or time window." },
-              { icon: "🌍", title: "Multi-currency", desc: "180+ currencies, FX at best market rates." },
-              { icon: "🔗", title: "Any LLM", desc: "GPT-4o, Claude, Gemini — framework agnostic." },
-              { icon: "📊", title: "Full audit trail", desc: "Every action logged, explainable, reversible." },
-            ].map((f) => (
+            {capabilityCards.map((f) => (
               <div
                 key={f.title}
                 className="rounded-2xl border border-white/[0.07] p-5 hover:border-white/15 transition-all"
@@ -319,22 +359,35 @@ export default function Home() {
         <section className="pb-24">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
             <div>
-              <h2 className="text-xl font-semibold mb-2">Live on X</h2>
+              <h2 className="text-xl font-semibold mb-2">Posts and mentions on X</h2>
               <p className="text-white/30 text-sm">
-                Public posts from @barterpayments, straight from the official X timeline.
+                Latest posts from @barterpayments, plus a live X search for public mentions of the account.
               </p>
             </div>
-            <a
-              href="https://x.com/barterpayments"
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm text-white/45 hover:text-white transition-colors"
-            >
-              Open @barterpayments →
-            </a>
+            <div className="flex flex-col items-start sm:items-end gap-2 text-sm">
+              <a
+                href={X_PROFILE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/45 hover:text-white transition-colors"
+              >
+                Open @barterpayments →
+              </a>
+              <a
+                href={X_MENTIONS_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/45 hover:text-white transition-colors"
+              >
+                Open live mentions →
+              </a>
+            </div>
           </div>
-          <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-3 sm:p-4">
-            <XTimelineEmbed />
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.95fr)]">
+            <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-3 sm:p-4">
+              <XTimelineEmbed />
+            </div>
+            <XMentionsFeed />
           </div>
         </section>
 
@@ -363,7 +416,7 @@ export default function Home() {
       <footer className="border-t border-white/[0.06] px-6 py-6 max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-md bg-white flex items-center justify-center text-[9px] font-black text-black">B</div>
-          <span className="text-white/30 text-xs">Barter © 2025</span>
+          <span className="text-white/30 text-xs">Barter © {new Date().getFullYear()}</span>
         </div>
         <div className="flex gap-5 text-white/20 text-xs">
           <a href="https://x.com/barterpayments" target="_blank" rel="noreferrer" className="hover:text-white/50 transition-colors">𝕏 Twitter</a>
