@@ -47,15 +47,15 @@ const S = {
   logoBox: { width: 28, height: 28, borderRadius: 8, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#000' } as React.CSSProperties,
   wrap:    { maxWidth: 760, margin: '0 auto', padding: '0 24px 80px' } as React.CSSProperties,
   section: { marginTop: 48 } as React.CSSProperties,
-  label:   { fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)', marginBottom: 6 },
-  card:    { background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '20px 24px' } as React.CSSProperties,
+  label:   { fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.55)', marginBottom: 8 },
+  card:    { background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '22px 24px' } as React.CSSProperties,
   row:     { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 } as React.CSSProperties,
-  mono:    { fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', wordBreak: 'break-all' as const },
-  muted:   { fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', marginTop: 4 } as React.CSSProperties,
-  btnW:    { background: '#fff', color: '#000', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
-  btnO:    { background: 'transparent', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '8px 16px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
-  divider: { borderTop: '1px solid rgba(255,255,255,0.06)', margin: '16px 0' } as React.CSSProperties,
-  tag:     { display: 'inline-block', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '2px 10px', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' } as React.CSSProperties,
+  mono:    { fontFamily: 'monospace', fontSize: '0.88rem', color: '#fff', wordBreak: 'break-all' as const },
+  muted:   { fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginTop: 4, lineHeight: 1.5 } as React.CSSProperties,
+  btnW:    { background: '#fff', color: '#000', border: 'none', borderRadius: 10, padding: '9px 20px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
+  btnO:    { background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 10, padding: '8px 18px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
+  divider: { borderTop: '1px solid rgba(255,255,255,0.08)', margin: '18px 0' } as React.CSSProperties,
+  tag:     { display: 'inline-block', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 99, padding: '3px 12px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)', fontWeight: 500 } as React.CSSProperties,
 };
 
 const XIcon = () => (
@@ -156,7 +156,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 900, margin: '12px 0 6px', letterSpacing: '-0.02em' }}>
             Your Dashboard
           </h1>
-          <p style={{ ...S.muted, fontSize: '0.88rem' }}>
+          <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.7)', marginTop: 6, lineHeight: 1.5 }}>
             {isReady ? 'All set — launch the terminal to start transacting.' : 'Complete setup below to start using @barterpayments.'}
           </p>
         </div>
