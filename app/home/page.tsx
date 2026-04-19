@@ -126,11 +126,7 @@ export default function HomePage() {
               </a>
             </div>
             <nav className="nav-links">
-              <a href="/use-via-barter">Use via Barter Payments</a>
               <a href="/dashboard">Terminal</a>
-              <a href="/agent-commerce">Agent Commerce</a>
-              <a href="/docs">Docs</a>
-              <a href="/token">Token</a>
             </nav>
             <div className="nav-actions">
               <a className="nav-social" href="https://x.com/barterpayments" target="_blank" rel="noreferrer" aria-label="Barter Payments on X">
@@ -139,7 +135,6 @@ export default function HomePage() {
                 </svg>
                 <span>@barterpayments</span>
               </a>
-              <a className="button secondary" href="/docs">Get started</a>
             </div>
           </header>
           <div className="hero">
@@ -151,7 +146,6 @@ export default function HomePage() {
               </p>
               <div className="hero-actions">
                 <a className="button primary" href="/dashboard">Launch Terminal</a>
-                <a className="button secondary" href="/use-via-barter">Explore MPP network</a>
               </div>
             </div>
             <div className="hero-card">
@@ -196,7 +190,6 @@ export default function HomePage() {
                 Browse the first service registry, see the weather/search/browser/email/model demo stack, and use the merchant kit to bring more services into the Barter Payments network.
               </p>
             </div>
-            <a className="button primary" href="/use-via-barter">Open the MPP page</a>
           </div>
         </div>
       </section>
@@ -251,8 +244,6 @@ export default function HomePage() {
             ))}
           </div>
           <div className="hero-actions" style={{ marginTop: 22 }}>
-            <a className="button primary" href="/docs">Open full docs</a>
-            <a className="button secondary" href="/docs#agent-execute">/agent/execute</a>
           </div>
           <div className="card" style={{ marginTop: 28 }}>
             <h4>Example: /agent/execute</h4>
@@ -293,9 +284,6 @@ export default function HomePage() {
         <div className="container footer-inner">
           <strong>Barter Payments</strong>
           <nav className="footer-links">
-            <a href="/use-via-barter">Use via Barter Payments</a>
-            <a href="/agent-commerce">Agent Commerce</a>
-            <a href="/docs">Docs</a>
             <a href="/about">About</a>
             <a href="/contact">Contact</a>
             <a href="/legal/privacy">Privacy</a>

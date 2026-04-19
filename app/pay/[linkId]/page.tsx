@@ -31,7 +31,6 @@ export default async function PaymentPage({ params }: { params: Promise<{ linkId
               </a>
             </div>
             <nav className="nav-links">
-              <a href="/docs">Docs</a>
               <a href="/dashboard">Dashboard</a>
             </nav>
             <div className="nav-actions">
@@ -80,7 +79,6 @@ export default async function PaymentPage({ params }: { params: Promise<{ linkId
         <div className="container footer-inner">
           <strong>Barter Payments</strong>
           <nav className="footer-links">
-            <a href="/docs">Docs</a>
             <a href="/about">About</a>
             <a href="/contact">Contact</a>
             <a href="/legal/privacy">Privacy</a>

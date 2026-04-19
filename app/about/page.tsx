@@ -20,9 +20,6 @@ export default function AboutPage() {
               </a>
             </div>
             <nav className="nav-links">
-              <a href="/agent-commerce">Agent Commerce</a>
-              <a href="/docs">Docs</a>
-              <a href="/token">Token</a>
               <a href="/about">About</a>
               <a href="/contact">Contact</a>
             </nav>
@@ -33,7 +30,6 @@ export default function AboutPage() {
                 </svg>
                 <span>@barterpayments</span>
               </a>
-              <a className="button secondary" href="/docs">Get started</a>
             </div>
           </header>
         </div>
@@ -77,8 +73,6 @@ export default function AboutPage() {
         <div className="container footer-inner">
           <strong>Barter Payments</strong>
           <nav className="footer-links">
-            <a href="/agent-commerce">Agent Commerce</a>
-            <a href="/docs">Docs</a>
             <a href="/contact">Contact</a>
             <a href="/legal/privacy">Privacy</a>
             <a href="/legal/terms">Terms</a>

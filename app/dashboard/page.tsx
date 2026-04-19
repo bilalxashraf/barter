@@ -44,9 +44,6 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
               </a>
             </div>
               <nav className="nav-links">
-                <a href="/agent-commerce">Agent Commerce</a>
-                <a href="/docs">Docs</a>
-                <a href="/token">Token</a>
                 <a href="/about">About</a>
                 <a href="/contact">Contact</a>
               </nav>
@@ -57,7 +54,6 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
                   </svg>
                   <span>@barterpayments</span>
                 </a>
-                <a className="button secondary" href="/docs">Get started</a>
               </div>
             </header>
           </div>
@@ -153,9 +149,6 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
               </a>
             </div>
             <nav className="nav-links">
-              <a href="/agent-commerce">Agent Commerce</a>
-              <a href="/docs">Docs</a>
-              <a href="/token">Token</a>
               <a href="/about">About</a>
               <a href="/contact">Contact</a>
             </nav>
@@ -370,8 +363,6 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
         <div className="container footer-inner">
           <strong>Barter Payments</strong>
           <nav className="footer-links">
-            <a href="/agent-commerce">Agent Commerce</a>
-            <a href="/docs">Docs</a>
             <a href="/about">About</a>
             <a href="/contact">Contact</a>
             <a href="/legal/privacy">Privacy</a>

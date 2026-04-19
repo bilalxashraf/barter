@@ -58,8 +58,6 @@ export default async function ChatPage() {
             </div>
             <nav className="nav-links">
               <a href="/dashboard">Dashboard</a>
-              <a href="/agent-commerce">Agent Commerce</a>
-              <a href="/docs">Docs</a>
               <a href="/about">About</a>
             </nav>
             <div className="nav-actions">

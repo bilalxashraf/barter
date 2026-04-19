@@ -71,7 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     url: 'https://barterpayments.xyz',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://barterpayments.xyz/docs?q={search_term_string}',
+      target: 'https://barterpayments.xyz/home?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   };
