@@ -1,45 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import XTimelineEmbed from "./components/XTimelineEmbed";
 import type { SiteMetrics } from "./_lib/siteMetrics.types";
-
-const SOCIAL_POSTS = [
-  {
-    handle: "@prakash_vc",
-    avatar: "P",
-    text: "Just told my AI agent to pay the invoice. It negotiated a 12% discount, split across 3 currencies, and settled in 40ms. Barter is insane.",
-    time: "2m ago",
-    likes: 841,
-  },
-  {
-    handle: "@nila.builds",
-    avatar: "N",
-    text: "Agentic payments are the missing layer of the internet. Your AI doesn't just browse — it transacts. @BarterHQ is building exactly this.",
-    time: "7m ago",
-    likes: 1203,
-  },
-  {
-    handle: "@devrel_arjun",
-    avatar: "D",
-    text: "Deployed a Barter webhook in 10 mins. My agent now handles vendor payments end-to-end — no human approval needed. The future is already here.",
-    time: "14m ago",
-    likes: 592,
-  },
-  {
-    handle: "@meera.fintech",
-    avatar: "M",
-    text: "Barter isn't crypto, it isn't traditional fintech. It's AI-native payments infrastructure. First mover advantage is MASSIVE right now.",
-    time: "22m ago",
-    likes: 2187,
-  },
-  {
-    handle: "@karan.io",
-    avatar: "K",
-    text: "My personal finance agent paid rent, rebalanced my portfolio, and sent 3 invoices while I was in a meeting. Barter waitlist >>> everything else.",
-    time: "31m ago",
-    likes: 977,
-  },
-];
 
 const numberFormatter = new Intl.NumberFormat("en-US");
 
@@ -147,24 +110,6 @@ function WaitlistModal({
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function SocialCard({ post }: { post: (typeof SOCIAL_POSTS)[0] }) {
-  return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 hover:border-white/15 hover:bg-white/[0.04] transition-all duration-200">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-xs font-semibold flex-shrink-0 text-white/70">
-          {post.avatar}
-        </div>
-        <div>
-          <span className="text-sm font-medium text-white/80">{post.handle}</span>
-          <span className="text-white/20 text-xs ml-2">{post.time}</span>
-        </div>
-      </div>
-      <p className="text-white/60 text-sm leading-relaxed">{post.text}</p>
-      <div className="mt-3 text-white/20 text-xs">♥ {post.likes.toLocaleString()}</div>
     </div>
   );
 }
@@ -364,14 +309,24 @@ export default function Home() {
 
         {/* Social proof */}
         <section className="pb-24">
-          <h2 className="text-xl font-semibold mb-2">People are talking</h2>
-          <p className="text-white/30 text-sm mb-8">From developers and founders across the internet</p>
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
-            {SOCIAL_POSTS.map((post) => (
-              <div key={post.handle} className="break-inside-avoid">
-                <SocialCard post={post} />
-              </div>
-            ))}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Live on X</h2>
+              <p className="text-white/30 text-sm">
+                Public posts from @barterpayments, straight from the official X timeline.
+              </p>
+            </div>
+            <a
+              href="https://x.com/barterpayments"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-white/45 hover:text-white transition-colors"
+            >
+              Open @barterpayments →
+            </a>
+          </div>
+          <div className="rounded-[28px] border border-white/[0.07] bg-white/[0.02] p-3 sm:p-4">
+            <XTimelineEmbed />
           </div>
         </section>
 

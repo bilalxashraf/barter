@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getSessionCookie } from '../../../../_lib/session';
 import { createAgentKey } from '../../../../_lib/agentApi';
+import { upsertMarketplaceAgentProfile } from '../../../../_lib/marketplaceRegistration';
 import { getUserByXId, upsertUser } from '../../../../_lib/xUserStore';
 
 export async function POST(req: Request) {
@@ -31,6 +32,35 @@ export async function POST(req: Request) {
       createdAt: existing?.createdAt || Date.now(),
       updatedAt: Date.now()
     });
+
+    if (existing?.solanaWalletNo) {
+      try {
+        await upsertMarketplaceAgentProfile({
+          agentId: session.agentId,
+          apiKey: keyResp.apiKey,
+          username: session.username,
+          chain: 'solana',
+          walletNo: existing.solanaWalletNo,
+        });
+      } catch (error) {
+        console.error('[Marketplace] Failed to sync registration after API key create', error);
+        return redirectTo('/dashboard?status=key_created_marketplace_sync_pending');
+      }
+    } else if (existing?.walletNo) {
+      try {
+        await upsertMarketplaceAgentProfile({
+          agentId: session.agentId,
+          apiKey: keyResp.apiKey,
+          username: session.username,
+          chain: 'base',
+          walletNo: existing.walletNo,
+        });
+      } catch (error) {
+        console.error('[Marketplace] Failed to sync registration after API key create', error);
+        return redirectTo('/dashboard?status=key_created_marketplace_sync_pending');
+      }
+    }
+
     return redirectTo('/dashboard?status=key_created');
   } catch (error: any) {
     const message = encodeURIComponent(error?.message || 'key_create_failed');

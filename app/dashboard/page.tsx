@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getSessionCookie } from '../_lib/session';
 import { getUserByXId } from '../_lib/xUserStore';
 import { listAgentWallets, listSolanaWallets } from '../_lib/agentApi';
+import { ensureMarketplaceAgentProfile } from '../_lib/marketplaceRegistration';
 import ApiKeyField from './ApiKeyField';
 import CopyButton from './CopyButton';
 import StatusBanner from './StatusBanner';
@@ -127,6 +128,30 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
   const activeWalletNo = activeWallet?.walletNo || 1;
   const activeSolanaWalletNo = activeSolanaWallet?.walletNo || 1;
   const isReady = record?.apiKey && (wallets.length > 0 || solanaWallets.length > 0);
+  let marketplaceSyncError: string | null = null;
+
+  if (record?.apiKey) {
+    const marketplaceWallet =
+      activeSolanaWallet
+        ? { chain: 'solana' as const, walletNo: activeSolanaWallet.walletNo }
+        : activeWallet
+          ? { chain: 'base' as const, walletNo: activeWallet.walletNo }
+          : null;
+
+    if (marketplaceWallet?.walletNo) {
+      try {
+        await ensureMarketplaceAgentProfile({
+          agentId: session.agentId,
+          apiKey: record.apiKey,
+          username: session.username,
+          chain: marketplaceWallet.chain,
+          walletNo: marketplaceWallet.walletNo,
+        });
+      } catch (error: any) {
+        marketplaceSyncError = error?.message || 'Failed to sync marketplace profile';
+      }
+    }
+  }
 
   /* ── Logged in UI ── */
   return (
@@ -166,6 +191,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           <div style={{ background: 'rgba(255,80,80,0.07)', border: '1px solid rgba(255,80,80,0.2)', borderRadius: 12, padding: '14px 18px', marginBottom: 24 }}>
             <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{authError.title}</div>
             {authError.detail && <div style={S.muted}>{authError.detail}</div>}
+          </div>
+        )}
+
+        {marketplaceSyncError && (
+          <div style={{ background: 'rgba(255,184,0,0.07)', border: '1px solid rgba(255,184,0,0.2)', borderRadius: 12, padding: '14px 18px', marginBottom: 24 }}>
+            <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>Marketplace registration is still pending.</div>
+            <div style={S.muted}>Your wallet setup is saved locally, but the upstream marketplace profile could not be synced yet.</div>
+            <div style={S.muted}>{marketplaceSyncError}</div>
           </div>
         )}
 

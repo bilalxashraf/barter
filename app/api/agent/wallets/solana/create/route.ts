@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getSessionCookie } from '../../../../../_lib/session';
 import { createSolanaWallet, listSolanaWallets, listAgentWallets } from '../../../../../_lib/agentApi';
+import { upsertMarketplaceAgentProfile } from '../../../../../_lib/marketplaceRegistration';
 import { getUserByXId, upsertUser } from '../../../../../_lib/xUserStore';
 
 export async function POST(req: Request) {
@@ -52,6 +53,19 @@ export async function POST(req: Request) {
       createdAt: existing.createdAt || Date.now(),
       updatedAt: Date.now()
     });
+
+    try {
+      await upsertMarketplaceAgentProfile({
+        agentId: session.agentId,
+        apiKey: existing.apiKey,
+        username: session.username,
+        chain: 'solana',
+        walletNo: walletResp.wallet.walletNo,
+      });
+    } catch (error) {
+      console.error('[Marketplace] Failed to sync registration after Solana wallet create', error);
+      return redirectTo('/dashboard?status=solana_wallet_created_marketplace_sync_pending');
+    }
 
     return redirectTo('/dashboard?status=solana_wallet_created');
   } catch (error: any) {
