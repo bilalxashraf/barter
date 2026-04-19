@@ -491,17 +491,17 @@ function formatDate(value: number): string {
 }
 
 const panelStyle: CSSProperties = {
-  border: '1px solid rgba(255,255,255,0.08)',
+  border: '1px solid rgba(255,255,255,0.1)',
   borderRadius: 16,
   padding: 18,
-  background: 'rgba(255,255,255,0.02)'
+  background: '#111'
 };
 
 const rowStyle: CSSProperties = {
-  border: '1px solid rgba(255,255,255,0.08)',
+  border: '1px solid rgba(255,255,255,0.1)',
   borderRadius: 14,
   padding: 16,
-  background: 'rgba(255,255,255,0.02)',
+  background: '#111',
   display: 'flex',
   justifyContent: 'space-between',
   gap: 12,
@@ -514,7 +514,7 @@ const noticeStyle: CSSProperties = {
   borderRadius: 10,
   marginTop: 16,
   border: '1px solid rgba(255,255,255,0.12)',
-  background: 'rgba(255,255,255,0.04)'
+  background: '#111'
 };
 
 function metricPillStyle(color: string): CSSProperties {

@@ -128,7 +128,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
       )}
 
       {createdLink && (
-        <div className="card" style={{ marginTop: 16, background: 'rgba(100, 200, 255, 0.05)' }}>
+        <div className="card" style={{ marginTop: 16, background: '#111' }}>
           <h4>Payment Link Created!</h4>
           <div style={{ marginTop: 12 }}>
             <p className="muted" style={{ marginBottom: 8 }}>Share this link:</p>
@@ -275,7 +275,7 @@ export default function PaymentLinksSection({ agentId, apiKey, wallets, solanaWa
                 <div
                   key={link.linkId}
                   className="card"
-                  style={{ padding: 12, background: 'rgba(255,255,255,0.02)' }}
+                  style={{ padding: 12, background: '#111' }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                     <div style={{ flex: 1 }}>

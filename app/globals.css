@@ -3050,13 +3050,20 @@ body:has(.dashboard) {
 
 /* Cards */
 .dashboard .card {
-  background: #0d0d0d;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: #0d0d0d !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  box-shadow: none !important;
 }
-.dashboard .card h4 { color: #fff; font-size: 1rem; }
-.dashboard .card p  { color: rgba(255, 255, 255, 0.7); }
-.dashboard .muted   { color: rgba(255, 255, 255, 0.6); }
+.dashboard .card:hover {
+  background: #111 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.dashboard .card h4 { color: #fff !important; font-size: 1rem; }
+.dashboard .card p  { color: rgba(255, 255, 255, 0.7) !important; }
+.dashboard .muted   { color: rgba(255, 255, 255, 0.6) !important; }
 
 /* Buttons */
 .dashboard .button.primary {
