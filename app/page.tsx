@@ -121,11 +121,13 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
+    const visitState = window as Window & {
+      __barterInitialVisitTracked?: boolean;
+    };
 
     async function loadMetrics(methodOverride?: "GET" | "POST") {
       try {
-        const hasTrackedVisit = sessionStorage.getItem("barter:visit-tracked") === "1";
-        const method = methodOverride || (hasTrackedVisit ? "GET" : "POST");
+        const method = methodOverride || (visitState.__barterInitialVisitTracked ? "GET" : "POST");
         const res = await fetch("/api/metrics", {
           method,
           cache: "no-store",
@@ -137,8 +139,8 @@ export default function Home() {
         const data = (await res.json()) as { metrics?: SiteMetrics };
         if (!active || !data.metrics) return;
 
-        if (method === "POST" && !hasTrackedVisit) {
-          sessionStorage.setItem("barter:visit-tracked", "1");
+        if (method === "POST") {
+          visitState.__barterInitialVisitTracked = true;
         }
 
         setMetrics(data.metrics);
