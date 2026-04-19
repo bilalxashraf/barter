@@ -178,7 +178,7 @@ export default function Home() {
   const metricCards = [
     {
       value: metrics ? numberFormatter.format(metrics.totalVisits) : "—",
-      label: "real page visits",
+      label: "page visits",
     },
     {
       value: metrics ? numberFormatter.format(metrics.uniqueVisitors) : "—",
@@ -194,22 +194,7 @@ export default function Home() {
     },
     {
       value: metrics ? numberFormatter.format(metrics.solanaWalletUsersCount) : "—",
-      label: "users with solana wallets",
-    },
-  ];
-
-  const summaryCards = [
-    {
-      value: metrics ? numberFormatter.format(metrics.waitlistCount) : "—",
-      label: "waitlist signups",
-    },
-    {
-      value: metrics ? numberFormatter.format(metrics.connectedXCount) : "—",
-      label: "private beta accounts",
-    },
-    {
-      value: metrics ? numberFormatter.format(metrics.solanaWalletUsersCount) : "—",
-      label: "wallets provisioned",
+      label: "solana wallets created",
     },
   ];
 
@@ -300,36 +285,29 @@ export default function Home() {
           </p>
         </section>
 
-        <section className="pb-12">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+        <section className="pb-20">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-5">
             <div>
               <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-white/65">Live metrics</h2>
               <p className="text-white/30 text-sm mt-2">
-                Real counters from actual visits and waitlist signups.
+                Live counters for traffic, waitlist demand, connected X accounts, and wallets created during the beta.
               </p>
             </div>
-            <p className="text-white/20 text-xs">
+            <p className="text-white/20 text-xs sm:text-right">
               {metrics ? `Updated ${new Date(metrics.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Loading live counters…"}
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 items-stretch">
             {metricCards.map((metric) => (
-              <div key={metric.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6">
-                <div className="text-3xl font-black text-white">{metric.value}</div>
-                <div className="text-white/30 text-xs mt-2 uppercase tracking-[0.16em]">{metric.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Stats */}
-        <section className="pb-20">
-          <div className="grid grid-cols-3 divide-x divide-white/[0.06] border border-white/[0.06] rounded-2xl overflow-hidden">
-            {summaryCards.map((s) => (
-              <div key={s.label} className="py-8 text-center">
-                <div className="text-2xl font-black text-white">{s.value}</div>
-                <div className="text-white/30 text-xs mt-1">{s.label}</div>
+              <div
+                key={metric.label}
+                className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6 min-h-[188px] flex flex-col justify-between"
+              >
+                <div className="text-4xl font-black text-white leading-none">{metric.value}</div>
+                <div className="text-white/30 text-xs uppercase tracking-[0.16em] leading-relaxed max-w-[10ch]">
+                  {metric.label}
+                </div>
               </div>
             ))}
           </div>
