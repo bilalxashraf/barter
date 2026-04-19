@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { setSessionCookie } from '../../../../_lib/session';
-import { buildXBasicAuthHeader, xClientRequiresSecret } from '../../../../_lib/xAuth';
+import {
+  buildXBasicAuthHeader,
+  fingerprintValue,
+  getXClientDiagnostics,
+  xClientRequiresSecret,
+} from '../../../../_lib/xAuth';
 import { getUserByXId, upsertUser } from '../../../../_lib/xUserStore';
 
 export async function GET(req: Request) {
@@ -15,19 +20,25 @@ export async function GET(req: Request) {
   const clientSecret = process.env.X_CLIENT_SECRET;
   const redirectUri = process.env.X_REDIRECT_URI;
   const requiresClientSecret = clientId ? xClientRequiresSecret(clientId) : false;
+  const currentOriginCallback = `${url.origin}/api/auth/x/callback`;
 
   console.log('[Auth] Callback received', {
     hasCode: !!code,
+    codeLength: code?.length ?? 0,
     hasState: !!state,
+    stateLength: state?.length ?? 0,
     hasClientId: !!clientId,
     hasClientSecret: !!clientSecret,
     requiresClientSecret,
     hasRedirectUri: !!redirectUri,
     redirectUri,
+    currentOriginCallback,
+    redirectUriMatchesCurrentOrigin: redirectUri === currentOriginCallback,
     hasAuthSecret: !!process.env.X_AUTH_SECRET,
     hasGcsBucket: !!process.env.GCS_BUCKET_NAME,
     origin: url.origin,
     baseUrl,
+    client: getXClientDiagnostics(clientId, clientSecret),
   });
 
   if (!code || !state) {
@@ -79,12 +90,26 @@ export async function GET(req: Request) {
   const tokenHeaders: Record<string, string> = {
     'Content-Type': 'application/x-www-form-urlencoded',
   };
+  let authorizationHeader: string | undefined;
 
   if (clientSecret) {
-    tokenHeaders.Authorization = buildXBasicAuthHeader(clientId, clientSecret);
+    authorizationHeader = buildXBasicAuthHeader(clientId, clientSecret);
+    tokenHeaders.Authorization = authorizationHeader;
   } else {
     console.warn('[Auth] X_CLIENT_SECRET not set — token exchange may fail for confidential apps');
   }
+
+  console.log('[Auth] Token request diagnostics', {
+    tokenEndpoint: 'https://api.twitter.com/2/oauth2/token',
+    authMethod: authorizationHeader ? 'basic_header' : 'body_client_id_only',
+    hasAuthorizationHeader: !!authorizationHeader,
+    authorizationHeaderLength: authorizationHeader?.length ?? 0,
+    authorizationHeaderFingerprint: fingerprintValue(authorizationHeader),
+    tokenBodyKeys: Array.from(tokenBody.keys()),
+    tokenBodyHasClientId: tokenBody.has('client_id'),
+    tokenBodyRedirectUri: tokenBody.get('redirect_uri'),
+    codeVerifierLength: verifier.length,
+  });
 
   console.log('[Auth] Exchanging code for token', { redirectUri });
 
@@ -101,7 +126,11 @@ export async function GET(req: Request) {
   }
 
   const tokenText = await tokenRes.text();
-  console.log('[Auth] Token exchange response', { status: tokenRes.status, body: tokenText });
+  console.log('[Auth] Token exchange response', {
+    status: tokenRes.status,
+    wwwAuthenticate: tokenRes.headers.get('www-authenticate'),
+    body: tokenText,
+  });
 
   if (!tokenRes.ok) {
     try {

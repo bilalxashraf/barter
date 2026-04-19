@@ -29,9 +29,40 @@ export function buildXBasicAuthHeader(clientId: string, clientSecret: string): s
   return `Basic ${basic}`;
 }
 
+export function fingerprintValue(value: string | undefined): string | null {
+  if (!value) return null;
+  return crypto.createHash('sha256').update(value).digest('hex').slice(0, 12);
+}
+
+export function getXClientDiagnostics(clientId: string | undefined, clientSecret: string | undefined) {
+  const decodedClientId = decodeXClientId(clientId);
+
+  return {
+    hasClientId: !!clientId,
+    clientIdLength: clientId?.length ?? 0,
+    clientIdFingerprint: fingerprintValue(clientId),
+    decodedClientId,
+    decodedClientIdFingerprint: fingerprintValue(decodedClientId ?? undefined),
+    decodedClientIdHasConfidentialSuffix: decodedClientId?.endsWith(':ci') ?? false,
+    hasClientSecret: !!clientSecret,
+    clientSecretLength: clientSecret?.length ?? 0,
+    clientSecretFingerprint: fingerprintValue(clientSecret),
+    requiresClientSecret: clientId ? xClientRequiresSecret(clientId) : false,
+  };
+}
+
 function formUrlEncode(value: string): string {
   const params = new URLSearchParams({ value });
   return params.toString().slice('value='.length);
+}
+
+function decodeXClientId(clientId: string | undefined): string | null {
+  if (!clientId) return null;
+  try {
+    return Buffer.from(clientId, 'base64url').toString('utf8');
+  } catch {
+    return null;
+  }
 }
 
 function base64Url(buffer: Buffer): string {

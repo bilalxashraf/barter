@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import {
   generateCodeChallenge,
   generateCodeVerifier,
+  getXClientDiagnostics,
   generateState,
   xClientRequiresSecret,
 } from '../../../../_lib/xAuth';
@@ -14,6 +15,18 @@ export async function GET(req: Request) {
   const clientId = process.env.X_CLIENT_ID;
   const clientSecret = process.env.X_CLIENT_SECRET;
   const redirectUri = process.env.X_REDIRECT_URI;
+  const currentOriginCallback = `${url.origin}/api/auth/x/callback`;
+
+  console.log('[Auth] Start config', {
+    origin: url.origin,
+    baseUrl,
+    redirectUri,
+    currentOriginCallback,
+    redirectUriMatchesCurrentOrigin: redirectUri === currentOriginCallback,
+    hasAuthSecret: !!process.env.X_AUTH_SECRET,
+    nodeEnv: process.env.NODE_ENV,
+    client: getXClientDiagnostics(clientId, clientSecret),
+  });
 
   if (!clientId || !redirectUri) {
     return redirectTo('/dashboard?error=config_missing&detail=check_x_oauth_env');
