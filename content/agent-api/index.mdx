@@ -1,0 +1,52 @@
+---
+id: index
+title: Agent API Overview
+---
+
+# Agent API
+
+A production‑grade API for autonomous onchain actions. The Agent API is designed for **agentic workflows** that require natural language → onchain execution with strict control, clear observability, and safe defaults.
+
+**What you can do:**
+- Parse intent and generate quotes
+- Resolve tokens (symbols, tickers, addresses)
+- Analyze wallets and balances
+- Execute swaps and transfers via agent wallets
+- Build and submit limit orders
+
+**Security model:**
+- One API key per agent (required for `/agent/*` endpoints)
+
+**Who it’s for:**
+- AI agents that need reliable, structured onchain actions
+- Apps that want a single endpoint for natural language execution
+- Teams that need safety, auditability, and deterministic outputs
+
+---
+
+## Architecture at a glance
+
+The API is split into two layers:
+
+**1) Non‑custodial endpoints**
+Return transaction data or read‑only information. You sign & broadcast externally.
+
+**2) Agent execution endpoints**
+Use Coinbase CDP wallets to sign and broadcast server‑side, enabling full automation.
+
+---
+
+## Guarantees
+
+- **Consistent error format** with request IDs
+- **Chain‑aware token resolution**
+- **Deterministic JSON responses**
+- **Clean separation of quote vs execution**
+
+---
+
+## Recommended next steps
+
+- Start with the Quickstart
+- Try the 60‑second demo
+- Explore `/agent/execute` in depth

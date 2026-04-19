@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const SOCIAL_POSTS = [
   {
@@ -178,13 +178,6 @@ function SocialCard({ post, delay }: { post: (typeof SOCIAL_POSTS)[0]; delay: nu
 
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
 
   return (
     <main className="min-h-screen bg-[#020205] text-white overflow-x-hidden">

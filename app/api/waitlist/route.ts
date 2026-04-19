@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put, head } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 import { promises as fs } from "fs";
 import path from "path";
 
-const BLOB_NAME = "waitlist.txt";
 const LOCAL_FILE = path.join(process.cwd(), "waitlist.txt");
 const IS_VERCEL = !!process.env.VERCEL;
 
@@ -11,36 +10,33 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-async function readEmails(): Promise<string[]> {
+function emailToPath(email: string) {
+  return `waitlist/${email}.txt`;
+}
+
+async function emailExists(email: string): Promise<boolean> {
   if (IS_VERCEL) {
-    try {
-      const existing = await head(BLOB_NAME);
-      const res = await fetch(existing.url);
-      const text = await res.text();
-      return text.split("\n").map((l) => l.split("\t")[0].trim()).filter(Boolean);
-    } catch {
-      return [];
-    }
+    const { blobs } = await list({ prefix: emailToPath(email) });
+    return blobs.length > 0;
   } else {
     try {
       const text = await fs.readFile(LOCAL_FILE, "utf8");
-      return text.split("\n").map((l) => l.split("\t")[0].trim()).filter(Boolean);
+      return text.split("\n").some((l) => l.split("\t")[0].trim() === email);
     } catch {
-      return [];
+      return false;
     }
   }
 }
 
-async function appendEmail(email: string, emails: string[]): Promise<void> {
+async function saveEmail(email: string): Promise<void> {
   const timestamp = new Date().toISOString();
-  const line = `${email}\t${timestamp}\n`;
-
   if (IS_VERCEL) {
-    const allEmails = [...emails, email];
-    const content = allEmails.map((e) => `${e}\t${timestamp}`).join("\n") + "\n";
-    await put(BLOB_NAME, content, { access: "public", allowOverwrite: true });
+    await put(emailToPath(email), timestamp, {
+      access: "public",
+      addRandomSuffix: false,
+    });
   } else {
-    await fs.appendFile(LOCAL_FILE, line, "utf8");
+    await fs.appendFile(LOCAL_FILE, `${email}\t${timestamp}\n`, "utf8");
   }
 }
 
@@ -59,13 +55,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const emails = await readEmails();
-
-    if (emails.includes(email)) {
+    if (await emailExists(email)) {
       return NextResponse.json({ message: "Already on the waitlist!" });
     }
-
-    await appendEmail(email, emails);
+    await saveEmail(email);
     return NextResponse.json({ message: "You're on the waitlist!" });
   } catch (err) {
     console.error("Waitlist save error:", err);
