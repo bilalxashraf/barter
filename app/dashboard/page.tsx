@@ -5,7 +5,6 @@ import { listAgentWallets, listSolanaWallets } from '../_lib/agentApi';
 import ApiKeyField from './ApiKeyField';
 import CopyButton from './CopyButton';
 import StatusBanner from './StatusBanner';
-import BackButton from '../components/BackButton';
 import WalletBalance from './WalletBalance';
 import WalletSelector from './WalletSelector';
 import SolanaWalletBalance from './SolanaWalletBalance';
@@ -15,422 +14,285 @@ import CardsSection from './CardsSection';
 
 export const metadata = {
   title: 'Dashboard — Barter',
-  alternates: {
-    canonical: 'https://www.barterpayments.xyz/dashboard'
-  }
+  alternates: { canonical: 'https://barterpayments.xyz/dashboard' },
 };
 
 type DashboardSearchParams = Record<string, string | string[] | undefined>;
 
-const shortAddress = (address?: string) => {
-  if (!address) return '';
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+function readSearchParam(v: string | string[] | undefined) {
+  return Array.isArray(v) ? v[0] : v;
+}
+function decodeParam(v: string | undefined) {
+  if (!v) return undefined;
+  try { return decodeURIComponent(v); } catch { return v; }
+}
+function getAuthError(p?: DashboardSearchParams) {
+  const error  = decodeParam(readSearchParam(p?.error));
+  const detail = decodeParam(readSearchParam(p?.detail));
+  if (!error) return null;
+  const map: Record<string, { title: string; detail?: string }> = {
+    'config_missing:missing_x_client_secret':       { title: 'X OAuth not configured.', detail: 'Add X_CLIENT_SECRET to Vercel and redeploy.' },
+    'config_missing:missing_or_invalid_x_client_secret': { title: 'X rejected the token exchange.', detail: 'The client secret is missing or invalid.' },
+    'config_missing:missing_auth_secret':           { title: 'Session signing not configured.', detail: 'Add X_AUTH_SECRET to Vercel and redeploy.' },
+    'oauth_state:cookie_mismatch':                  { title: 'Login session expired.', detail: 'Try connecting X again in the same tab.' },
+  };
+  return map[`${error}:${detail}`] ?? { title: error.replace(/_/g, ' '), detail: detail?.replace(/_/g, ' ') };
+}
+
+/* ─── shared inline style tokens ─── */
+const S = {
+  page:    { background: '#000', minHeight: '100vh', color: '#fff', fontFamily: 'Inter, system-ui, sans-serif' } as React.CSSProperties,
+  nav:     { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', maxWidth: 760, margin: '0 auto', width: '100%' } as React.CSSProperties,
+  logo:    { display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: '#fff', fontWeight: 700, fontSize: '0.95rem' } as React.CSSProperties,
+  logoBox: { width: 28, height: 28, borderRadius: 8, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#000' } as React.CSSProperties,
+  wrap:    { maxWidth: 760, margin: '0 auto', padding: '0 24px 80px' } as React.CSSProperties,
+  section: { marginTop: 48 } as React.CSSProperties,
+  label:   { fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)', marginBottom: 6 },
+  card:    { background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '20px 24px' } as React.CSSProperties,
+  row:     { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 } as React.CSSProperties,
+  mono:    { fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', wordBreak: 'break-all' as const },
+  muted:   { fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', marginTop: 4 } as React.CSSProperties,
+  btnW:    { background: '#fff', color: '#000', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
+  btnO:    { background: 'transparent', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '8px 16px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as React.CSSProperties,
+  divider: { borderTop: '1px solid rgba(255,255,255,0.06)', margin: '16px 0' } as React.CSSProperties,
+  tag:     { display: 'inline-block', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '2px 10px', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' } as React.CSSProperties,
 };
 
-function readSearchParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function decodeSearchParam(value: string | undefined): string | undefined {
-  if (!value) return undefined;
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-function getAuthError(params?: DashboardSearchParams): { title: string; detail?: string } | null {
-  const error = decodeSearchParam(readSearchParam(params?.error));
-  const detail = decodeSearchParam(readSearchParam(params?.detail));
-
-  if (!error) return null;
-
-  if (error === 'config_missing' && detail === 'missing_x_client_secret') {
-    return {
-      title: 'X OAuth is not configured for this deployment.',
-      detail: 'Add X_CLIENT_SECRET to the environment and redeploy before trying Connect X again.',
-    };
-  }
-
-  if (error === 'config_missing' && detail === 'missing_or_invalid_x_client_secret') {
-    return {
-      title: 'X rejected the token exchange for this deployment.',
-      detail: 'The X client secret is missing or invalid in the deployed environment.',
-    };
-  }
-
-  if (error === 'config_missing' && detail === 'missing_auth_secret') {
-    return {
-      title: 'Session signing is not configured for this deployment.',
-      detail: 'Add X_AUTH_SECRET to the environment and redeploy before trying Connect X again.',
-    };
-  }
-
-  if (error === 'oauth_state' && detail === 'cookie_mismatch') {
-    return {
-      title: 'The X login session expired before the callback completed.',
-      detail: 'Try Connect X again in the same browser tab.',
-    };
-  }
-
-  return {
-    title: error.replace(/_/g, ' '),
-    detail: detail?.replace(/_/g, ' '),
-  };
-}
+const XIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.507 11.24H16.32l-5.11-6.675-5.84 6.675H2.06l7.73-8.84L1.61 2.25h6.676l4.62 6.11 5.338-6.11Zm-1.162 17.52h1.833L6.68 4.126H4.72l12.362 15.645Z" />
+  </svg>
+);
 
 export default async function DashboardPage({ searchParams }: { searchParams?: Promise<DashboardSearchParams> }) {
   const cookieStore = await cookies();
   const session = getSessionCookie(cookieStore);
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const authError = getAuthError(resolvedSearchParams);
+  const params = searchParams ? await searchParams : undefined;
+  const authError = getAuthError(params);
 
+  /* ── Not logged in ── */
   if (!session) {
     return (
-      <main className="dashboard">
-        <section>
-          <div className="container">
-            <header className="nav">
-              <div className="nav-left">
-              <BackButton />
-              <a className="nav-logo" href="/">
-                <img src="/BarterPaymentLogo.png" alt="Barter logo" width={36} height={36} />
-                <span>Barter</span>
-              </a>
-            </div>
-              <nav className="nav-links">
-              </nav>
-              <div className="nav-actions">
-                <a className="nav-social" href="https://x.com/barterpayments" target="_blank" rel="noreferrer" aria-label="Barter on X">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.507 11.24H16.32l-5.11-6.675-5.84 6.675H2.06l7.73-8.84L1.61 2.25h6.676l4.62 6.11 5.338-6.11Zm-1.162 17.52h1.833L6.68 4.126H4.72l12.362 15.645Z" />
-                  </svg>
-                  <span>@barterpayments</span>
-                </a>
-              </div>
-            </header>
-          </div>
-        </section>
+      <main style={S.page}>
+        <nav style={{ ...S.nav, maxWidth: '100%', padding: '16px 32px' }}>
+          <a href="/" style={S.logo}>
+            <div style={S.logoBox}>B</div>
+            <span>Barter</span>
+          </a>
+          <a href="https://x.com/barterpayments" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', textDecoration: 'none' }}>
+            <XIcon /> @barterpayments
+          </a>
+        </nav>
 
-        <section>
-          <div className="container">
-            <div className="page-hero">
-              <h1>Connect your X account</h1>
-              <p>Sign in to manage your agent key and wallet for @barterpayments mentions.</p>
+        <div style={{ maxWidth: 480, margin: '80px auto', padding: '0 24px', textAlign: 'center' }}>
+          {authError && (
+            <div style={{ background: 'rgba(255,80,80,0.07)', border: '1px solid rgba(255,80,80,0.2)', borderRadius: 12, padding: '14px 18px', marginBottom: 28, textAlign: 'left' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{authError.title}</div>
+              {authError.detail && <div style={S.muted}>{authError.detail}</div>}
             </div>
-            {authError ? (
-              <div className="card" style={{ maxWidth: 720, marginBottom: 24, borderColor: 'rgba(255, 120, 120, 0.25)', background: 'rgba(255, 64, 64, 0.08)' }}>
-                <strong>{authError.title}</strong>
-                {authError.detail ? (
-                  <p className="muted" style={{ marginTop: 10 }}>{authError.detail}</p>
-                ) : null}
-              </div>
-            ) : null}
-            <div className="card" style={{ maxWidth: 520 }}>
-              <h4>Sign in with X</h4>
-              <p>Connect your X account to claim your agent ID. You’ll create your API key and wallet next.</p>
-              <a className="button primary" href="/api/auth/x/start">Connect X</a>
-              <p className="muted" style={{ marginTop: 16, fontSize: "0.85rem" }}>
-                💡 Tip: To switch accounts, first <a href="https://x.com/logout" target="_blank" rel="noreferrer" style={{ color: "var(--accent-4)", fontWeight: 600 }}>log out of X</a> in another tab, then return here.
-              </p>
-            </div>
-          </div>
-        </section>
+          )}
+          <div style={{ ...S.logoBox, width: 48, height: 48, borderRadius: 12, fontSize: 20, margin: '0 auto 24px' }}>B</div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, margin: '0 0 10px', letterSpacing: '-0.02em' }}>Barter Terminal</h1>
+          <p style={{ ...S.muted, fontSize: '0.9rem', marginBottom: 32 }}>Connect your X account to access the terminal.</p>
+          <a href="/api/auth/x/start" style={{ ...S.btnW, padding: '12px 28px', fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: 9 }}>
+            <XIcon /> Connect with X
+          </a>
+        </div>
       </main>
     );
   }
 
+  /* ── Fetch data ── */
   const record = await getUserByXId(session.xUserId);
   let wallets: { agentId: string; walletNo: number; address: string; networkId: string; createdAt: number }[] = [];
   let solanaWallets: { agentId: string; walletNo: number; address: string; networkId: string; createdAt: number }[] = [];
 
   if (record?.apiKey) {
-    try {
-      const list = await listAgentWallets(session.agentId, record.apiKey);
-      wallets = list.wallets || [];
-    } catch {
-      wallets = [];
-    }
-
-    try {
-      const solanaList = await listSolanaWallets(session.agentId, record.apiKey);
-      solanaWallets = solanaList.wallets || [];
-    } catch {
-      solanaWallets = [];
-    }
+    try { wallets = (await listAgentWallets(session.agentId, record.apiKey)).wallets || []; } catch { wallets = []; }
+    try { solanaWallets = (await listSolanaWallets(session.agentId, record.apiKey)).wallets || []; } catch { solanaWallets = []; }
   }
 
-  const fallbackWallet = record?.walletAddress
-    ? {
-        agentId: session.agentId,
-        walletNo: record.walletNo || 1,
-        address: record.walletAddress,
-        networkId: 'base',
-        createdAt: record.createdAt || Date.now()
-      }
-    : undefined;
+  const activeWallet =
+    wallets.find(w => record?.walletNo && w.walletNo === record.walletNo) ||
+    wallets.find(w => record?.walletAddress && w.address.toLowerCase() === record.walletAddress?.toLowerCase()) ||
+    wallets[0] ||
+    (record?.walletAddress ? { agentId: session.agentId, walletNo: record.walletNo || 1, address: record.walletAddress, networkId: 'base', createdAt: record.createdAt || Date.now() } : undefined);
 
-  const preferredWallet =
-    wallets.find((item) => record?.walletNo && item.walletNo === record.walletNo) ||
-    wallets.find((item) => record?.walletAddress && item.address.toLowerCase() === record.walletAddress.toLowerCase()) ||
-    wallets[0];
+  const activeSolanaWallet =
+    solanaWallets.find(w => record?.solanaWalletNo && w.walletNo === record.solanaWalletNo) ||
+    solanaWallets.find(w => record?.solanaWalletAddress && w.address === record.solanaWalletAddress) ||
+    solanaWallets[0] ||
+    (record?.solanaWalletAddress ? { agentId: session.agentId, walletNo: record.solanaWalletNo || 1, address: record.solanaWalletAddress, networkId: 'solana', createdAt: record.createdAt || Date.now() } : undefined);
 
-  const activeWallet = preferredWallet || fallbackWallet;
-  const activeWalletNo = activeWallet?.walletNo || wallets[0]?.walletNo || 1;
+  const activeWalletNo = activeWallet?.walletNo || 1;
+  const activeSolanaWalletNo = activeSolanaWallet?.walletNo || 1;
+  const isReady = record?.apiKey && (wallets.length > 0 || solanaWallets.length > 0);
 
-  // Solana wallet
-  const fallbackSolanaWallet = record?.solanaWalletAddress
-    ? {
-        agentId: session.agentId,
-        walletNo: record.solanaWalletNo || 1,
-        address: record.solanaWalletAddress,
-        networkId: 'solana',
-        createdAt: record.createdAt || Date.now()
-      }
-    : undefined;
-
-  const preferredSolanaWallet =
-    solanaWallets.find((item) => record?.solanaWalletNo && item.walletNo === record.solanaWalletNo) ||
-    solanaWallets.find((item) => record?.solanaWalletAddress && item.address === record.solanaWalletAddress) ||
-    solanaWallets[0];
-
-  const activeSolanaWallet = preferredSolanaWallet || fallbackSolanaWallet;
-  const activeSolanaWalletNo = activeSolanaWallet?.walletNo || solanaWallets[0]?.walletNo || 1;
-
+  /* ── Logged in UI ── */
   return (
-    <main className="dashboard">
-      <section>
-        <div className="container">
-          <header className="nav">
-            <div className="nav-left">
-              <BackButton />
-              <a className="nav-logo" href="/">
-                <img src="/BarterPaymentLogo.png" alt="Barter logo" width={36} height={36} />
-                <span>Barter</span>
-              </a>
-            </div>
-            <nav className="nav-links">
-            </nav>
-            <div className="nav-actions">
-              <a className="nav-social" href="https://x.com/barterpayments" target="_blank" rel="noreferrer" aria-label="Barter on X">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.507 11.24H16.32l-5.11-6.675-5.84 6.675H2.06l7.73-8.84L1.61 2.25h6.676l4.62 6.11 5.338-6.11Zm-1.162 17.52h1.833L6.68 4.126H4.72l12.362 15.645Z" />
-                </svg>
-                <span>@barterpayments</span>
-              </a>
-              <a className="button secondary" href="/api/auth/x/logout">Sign out</a>
-            </div>
-          </header>
+    <main style={S.page}>
+
+      {/* Nav */}
+      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <nav style={S.nav}>
+          <a href="/" style={S.logo}>
+            <div style={S.logoBox}>B</div>
+            <span>Barter</span>
+          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {isReady && (
+              <a href="/dashboard/chat" style={S.btnW}>Launch Terminal →</a>
+            )}
+            <a href="/api/auth/x/logout" style={S.btnO}>Sign out</a>
+          </div>
+        </nav>
+      </div>
+
+      <div style={S.wrap}>
+
+        {/* Header */}
+        <div style={{ paddingTop: 40, marginBottom: 40 }}>
+          <span style={S.tag}>@{session.username}</span>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 900, margin: '12px 0 6px', letterSpacing: '-0.02em' }}>
+            Your Dashboard
+          </h1>
+          <p style={{ ...S.muted, fontSize: '0.88rem' }}>
+            {isReady ? 'All set — launch the terminal to start transacting.' : 'Complete setup below to start using @barterpayments.'}
+          </p>
         </div>
-      </section>
 
-      <section>
-        <div className="container">
-          <div className="page-hero">
-            <h1>Welcome, @{session.username}</h1>
-            <p>Finish setup by creating your API key and wallet, then use @barterpayments mentions to execute onchain actions.</p>
-            {record?.apiKey && (wallets.length > 0 || solanaWallets.length > 0) ? (
-              <div style={{ marginTop: 16 }}>
-                <a href="/dashboard/chat" className="button primary">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                  Chat with Barter
-                </a>
-              </div>
-            ) : null}
+        {/* Error banner */}
+        {authError && (
+          <div style={{ background: 'rgba(255,80,80,0.07)', border: '1px solid rgba(255,80,80,0.2)', borderRadius: 12, padding: '14px 18px', marginBottom: 24 }}>
+            <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{authError.title}</div>
+            {authError.detail && <div style={S.muted}>{authError.detail}</div>}
           </div>
+        )}
 
-          {authError ? (
-            <div className="card" style={{ borderColor: 'rgba(255, 0, 0, 0.2)', background: 'rgba(255, 0, 0, 0.04)' }}>
-              <strong>{authError.title}</strong>
-              {authError.detail ? (
-                <p className="muted" style={{ marginTop: 10 }}>{authError.detail}</p>
-              ) : null}
-            </div>
-          ) : null}
+        <StatusBanner status={readSearchParam(params?.status)} />
 
-          <StatusBanner status={readSearchParam(resolvedSearchParams?.status)} />
+        {/* ── Agent ID ── */}
+        <div style={{ ...S.card, marginBottom: 12 }}>
+          <div style={S.label}>Agent ID</div>
+          <div style={S.mono}>{record?.agentId || session.agentId}</div>
+        </div>
 
-          <div className="page-grid">
-            <div className="card">
-              <h4>Agent ID</h4>
-              <p>{record?.agentId || session.agentId}</p>
-            </div>
-            <div className="card">
-              <h4>API Key</h4>
-              {record?.apiKey ? (
-                <ApiKeyField apiKey={record.apiKey} />
-              ) : (
-                <p>Not created yet</p>
-              )}
-              {!record?.apiKey ? (
-                <form action="/api/agent/keys/create" method="post">
-                  <button className="button primary" type="submit">Create API key</button>
-                </form>
-              ) : null}
-            </div>
-            <div className="card wallet-card">
-              <div className="wallet-header">
-                <div>
-                  <h4>Wallets</h4>
-                  <p className="muted">Choose a default wallet for @barterpayments actions.</p>
-                </div>
-                {record?.apiKey ? (
-                  <form action="/api/agent/wallets/create" method="post">
-                    <button className="button secondary" type="submit">
-                      {activeWallet ? 'Create new wallet' : 'Create wallet'}
-                    </button>
-                  </form>
-                ) : null}
-              </div>
-
-              {activeWallet?.address ? (
-                <div className="wallet-main">
-                  <div className="wallet-meta">
-                    <span className="wallet-label">Default wallet</span>
-                    <span className="wallet-id">Wallet {activeWallet.walletNo ?? '-'} </span>
-                    <span className="wallet-network">{(activeWallet.networkId || 'base').toUpperCase()}</span>
-                  </div>
-                  <div className="wallet-address-row">
-                    <span className="wallet-address">{activeWallet.address}</span>
-                    <CopyButton value={activeWallet.address} label="Copy" />
-                  </div>
-                </div>
-              ) : (
-                <div className="wallet-empty">
-                  <p>Not created yet</p>
-                </div>
-              )}
-
-              {wallets.length > 1 ? (
-                <WalletSelector
-                  wallets={wallets}
-                  activeWalletNo={activeWalletNo}
-                />
-              ) : null}
-
-              {activeWallet?.address ? (
-                <WalletBalance
-                  address={activeWallet.address}
-                  networkId={activeWallet.networkId || 'base'}
-                />
-              ) : null}
-
-              {!record?.apiKey ? (
-                <p className="muted">Create an API key to enable wallets.</p>
-              ) : null}
-            </div>
-
-            <div className="card wallet-card">
-              <div className="wallet-header">
-                <div>
-                  <h4>Solana Wallets</h4>
-                  <p className="muted">Create and manage Solana wallets for @barterpayments actions.</p>
-                </div>
-                {record?.apiKey ? (
-                  <form action="/api/agent/wallets/solana/create" method="post">
-                    <button className="button secondary" type="submit">
-                      {activeSolanaWallet ? 'Create new Solana wallet' : 'Create Solana wallet'}
-                    </button>
-                  </form>
-                ) : null}
-              </div>
-
-              {activeSolanaWallet?.address ? (
-                <div className="wallet-main">
-                  <div className="wallet-meta">
-                    <span className="wallet-label">Default Solana wallet</span>
-                    <span className="wallet-id">Wallet {activeSolanaWallet.walletNo ?? '-'} </span>
-                    <span className="wallet-network">SOLANA</span>
-                  </div>
-                  <div className="wallet-address-row">
-                    <span className="wallet-address">{activeSolanaWallet.address}</span>
-                    <CopyButton value={activeSolanaWallet.address} label="Copy" />
-                  </div>
-                </div>
-              ) : (
-                <div className="wallet-empty">
-                  <p>No Solana wallet created yet</p>
-                </div>
-              )}
-
-              {solanaWallets.length > 1 ? (
-                <SolanaWalletSelector
-                  wallets={solanaWallets}
-                  activeWalletNo={activeSolanaWalletNo}
-                />
-              ) : null}
-
-              {activeSolanaWallet?.address ? (
-                <SolanaWalletBalance
-                  agentId={session.agentId}
-                  walletNo={activeSolanaWallet.walletNo}
-                  address={activeSolanaWallet.address}
-                />
-              ) : null}
-
-              {!record?.apiKey ? (
-                <p className="muted">Create an API key to enable Solana wallets.</p>
-              ) : null}
-            </div>
-          </div>
-
-          {!record?.apiKey ? (
-            <div className="card" style={{ marginTop: 20 }}>
-              <h4>Already have an API key?</h4>
-              <p>Paste it here to link your X account to the existing agent.</p>
-              <form action="/api/agent/keys/save" method="post" className="form-inline">
-                <input type="text" name="apiKey" placeholder="ak_..." required />
-                <button className="button secondary" type="submit">Save key</button>
+        {/* ── API Key ── */}
+        <div style={{ ...S.card, marginBottom: 12 }}>
+          <div style={{ ...S.row, marginBottom: record?.apiKey ? 12 : 0 }}>
+            <div style={S.label}>API Key</div>
+            {!record?.apiKey && (
+              <form action="/api/agent/keys/create" method="post">
+                <button style={S.btnW} type="submit">Create API key</button>
               </form>
-            </div>
-          ) : null}
-
-          {record?.apiKey && (wallets.length > 0 || solanaWallets.length > 0) ? (
-            <PaymentLinksSection
-              agentId={session.agentId}
-              apiKey={record.apiKey}
-              wallets={wallets}
-              solanaWallets={solanaWallets}
-            />
-          ) : null}
-
+            )}
+          </div>
           {record?.apiKey ? (
-            <CardsSection
-              agentId={session.agentId}
-              apiKey={record.apiKey}
-              username={session.username}
-            />
-          ) : null}
+            <ApiKeyField apiKey={record.apiKey} />
+          ) : (
+            <>
+              <div style={S.divider} />
+              <div style={S.muted}>Already have a key? Paste it below to link your account.</div>
+              <form action="/api/agent/keys/save" method="post" style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <input type="text" name="apiKey" placeholder="ak_..." required
+                  style={{ flex: 1, background: '#000', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: '0.85rem', outline: 'none' }} />
+                <button style={S.btnO} type="submit">Save</button>
+              </form>
+            </>
+          )}
+        </div>
 
-          <div className="card" style={{ marginTop: 24 }}>
-            <h4>How to use on X</h4>
-            <ul>
-              <li>Fund your EVM wallet with ETH on Base or your Solana wallet with SOL.</li>
-              <li>Mention @barterpayments with a command.</li>
-              <li>We execute and reply with the tx hash.</li>
-            </ul>
-            <div className="code-block" style={{ marginTop: 16 }}>
-              @barterpayments swap 0.05 eth to usdc on base
+        {/* ── EVM Wallets ── */}
+        <div style={{ ...S.card, marginBottom: 12 }}>
+          <div style={{ ...S.row, marginBottom: 12 }}>
+            <div>
+              <div style={S.label}>EVM Wallet</div>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>Base network</div>
             </div>
-            <div className="code-block" style={{ marginTop: 12 }}>
-              @barterpayments swap 0.1 sol to usdc on solana
+            {record?.apiKey && (
+              <form action="/api/agent/wallets/create" method="post">
+                <button style={S.btnO} type="submit">{activeWallet ? '+ New' : 'Create wallet'}</button>
+              </form>
+            )}
+          </div>
+
+          {activeWallet?.address ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
+                <span style={S.tag}>{(activeWallet.networkId || 'base').toUpperCase()}</span>
+                <span style={S.tag}>Wallet {activeWallet.walletNo}</span>
+              </div>
+              <div style={{ ...S.mono, marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' as const }}>
+                <span style={{ flex: 1 }}>{activeWallet.address}</span>
+                <CopyButton value={activeWallet.address} label="Copy" />
+              </div>
+              {wallets.length > 1 && <WalletSelector wallets={wallets} activeWalletNo={activeWalletNo} />}
+              <WalletBalance address={activeWallet.address} networkId={activeWallet.networkId || 'base'} />
+            </>
+          ) : (
+            <div style={S.muted}>{record?.apiKey ? 'No wallet yet — create one above.' : 'Create an API key first.'}</div>
+          )}
+        </div>
+
+        {/* ── Solana Wallets ── */}
+        <div style={{ ...S.card, marginBottom: 24 }}>
+          <div style={{ ...S.row, marginBottom: 12 }}>
+            <div>
+              <div style={S.label}>Solana Wallet</div>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>Solana network</div>
             </div>
+            {record?.apiKey && (
+              <form action="/api/agent/wallets/solana/create" method="post">
+                <button style={S.btnO} type="submit">{activeSolanaWallet ? '+ New' : 'Create wallet'}</button>
+              </form>
+            )}
+          </div>
+
+          {activeSolanaWallet?.address ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={S.tag}>SOLANA</span>
+                <span style={S.tag}>Wallet {activeSolanaWallet.walletNo}</span>
+              </div>
+              <div style={{ ...S.mono, marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' as const }}>
+                <span style={{ flex: 1 }}>{activeSolanaWallet.address}</span>
+                <CopyButton value={activeSolanaWallet.address} label="Copy" />
+              </div>
+              {solanaWallets.length > 1 && <SolanaWalletSelector wallets={solanaWallets} activeWalletNo={activeSolanaWalletNo} />}
+              <SolanaWalletBalance agentId={session.agentId} walletNo={activeSolanaWallet.walletNo} address={activeSolanaWallet.address} />
+            </>
+          ) : (
+            <div style={S.muted}>{record?.apiKey ? 'No Solana wallet yet — create one above.' : 'Create an API key first.'}</div>
+          )}
+        </div>
+
+        {/* Payment links + Cards */}
+        {record?.apiKey && (wallets.length > 0 || solanaWallets.length > 0) && (
+          <PaymentLinksSection agentId={session.agentId} apiKey={record.apiKey} wallets={wallets} solanaWallets={solanaWallets} />
+        )}
+        {record?.apiKey && (
+          <CardsSection agentId={session.agentId} apiKey={record.apiKey} username={session.username} />
+        )}
+
+        {/* How to use */}
+        <div style={{ ...S.card, marginTop: 12 }}>
+          <div style={S.label}>How to use on X</div>
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+            {[
+              '@barterpayments swap 0.05 eth to usdc on base',
+              '@barterpayments swap 0.1 sol to usdc on solana',
+            ].map(cmd => (
+              <div key={cmd} style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '10px 14px', fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)' }}>
+                {cmd}
+              </div>
+            ))}
+          </div>
+          <div style={{ ...S.muted, marginTop: 14, fontSize: '0.78rem' }}>
+            Fund your wallet → mention @barterpayments → we execute and reply with the tx hash.
           </div>
         </div>
-      </section>
 
-      <footer className="footer">
-        <div className="container footer-inner">
-          <strong>Barter</strong>
-          <nav className="footer-links">
-            <a href="/legal/privacy">Privacy</a>
-            <a href="/legal/terms">Terms</a>
-          </nav>
-        </div>
-      </footer>
+      </div>
     </main>
   );
 }
