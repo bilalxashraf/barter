@@ -1,14 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
 
-const DATA_FILE = path.join(process.cwd(), "waitlist.txt");
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+async function redisCommand(command: string[]): Promise<unknown> {
+  const res = await fetch(`${REDIS_URL}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${REDIS_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(command),
+  });
+  if (!res.ok) throw new Error(`Redis error: ${res.status}`);
+  const json = await res.json();
+  return json.result;
+}
+
 export async function POST(req: NextRequest) {
+  if (!REDIS_URL || !REDIS_TOKEN) {
+    console.error("Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN");
+    return NextResponse.json({ error: "Server misconfigured." }, { status: 500 });
+  }
+
   let body: { email?: string };
   try {
     body = await req.json();
@@ -23,29 +41,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Read existing emails to deduplicate
-    let existing = "";
-    try {
-      existing = await fs.readFile(DATA_FILE, "utf8");
-    } catch {
-      // File doesn't exist yet — that's fine
-    }
+    // SADD returns 1 if added, 0 if already existed — handles deduplication atomically
+    const added = await redisCommand(["SADD", "waitlist", email]);
 
-    const emails = existing
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
-
-    if (emails.includes(email)) {
+    if (added === 0) {
       return NextResponse.json({ message: "Already on the waitlist!" });
     }
 
-    const timestamp = new Date().toISOString();
-    await fs.appendFile(DATA_FILE, `${email}\t${timestamp}\n`, "utf8");
+    // Store join timestamp in a hash for reference
+    await redisCommand(["HSET", "waitlist:timestamps", email, new Date().toISOString()]);
 
     return NextResponse.json({ message: "You're on the waitlist!" });
   } catch (err) {
-    console.error("Waitlist write error:", err);
+    console.error("Waitlist save error:", err);
     return NextResponse.json({ error: "Failed to save. Please try again." }, { status: 500 });
   }
 }
