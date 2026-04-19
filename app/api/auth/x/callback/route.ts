@@ -14,32 +14,47 @@ export async function GET(req: Request) {
   const clientSecret = process.env.X_CLIENT_SECRET;
   const redirectUri = process.env.X_REDIRECT_URI;
 
-  console.log('[OAuth Callback] Starting OAuth flow', {
+  console.log('[Auth] Callback received', {
     hasCode: !!code,
     hasState: !!state,
     hasClientId: !!clientId,
     hasClientSecret: !!clientSecret,
-    hasRedirectUri: !!redirectUri
+    hasRedirectUri: !!redirectUri,
+    redirectUri,
+    hasAuthSecret: !!process.env.X_AUTH_SECRET,
+    hasGcsBucket: !!process.env.GCS_BUCKET_NAME,
+    origin: url.origin,
+    baseUrl,
   });
 
-  if (!code || !state || !clientId || !redirectUri) {
-    console.error('[OAuth Callback] Missing required parameters');
-    return redirectTo('/dashboard?error=oauth_missing');
+  if (!code || !state) {
+    console.error('[Auth] Missing code or state from Twitter');
+    return redirectTo('/dashboard?error=oauth_missing&detail=no_code_or_state');
+  }
+
+  if (!clientId || !redirectUri) {
+    console.error('[Auth] Missing X_CLIENT_ID or X_REDIRECT_URI env vars');
+    return redirectTo('/dashboard?error=config_missing&detail=check_env_vars');
+  }
+
+  if (!process.env.X_AUTH_SECRET) {
+    console.error('[Auth] X_AUTH_SECRET is not set');
+    return redirectTo('/dashboard?error=config_missing&detail=missing_auth_secret');
   }
 
   const cookieStore = await cookies();
   const storedState = cookieStore.get('x_oauth_state')?.value;
   const verifier = cookieStore.get('x_oauth_verifier')?.value;
 
-  console.log('[OAuth Callback] Cookie check', {
+  console.log('[Auth] Cookie check', {
     hasStoredState: !!storedState,
     stateMatches: storedState === state,
-    hasVerifier: !!verifier
+    hasVerifier: !!verifier,
   });
 
   if (!storedState || storedState !== state || !verifier) {
-    console.error('[OAuth Callback] State/verifier validation failed');
-    return redirectTo('/dashboard?error=oauth_state');
+    console.error('[Auth] State/verifier mismatch — cookie may have expired or been lost');
+    return redirectTo('/dashboard?error=oauth_state&detail=cookie_mismatch');
   }
 
   const tokenBody = new URLSearchParams({
@@ -47,97 +62,112 @@ export async function GET(req: Request) {
     grant_type: 'authorization_code',
     client_id: clientId,
     redirect_uri: redirectUri,
-    code_verifier: verifier
+    code_verifier: verifier,
   });
 
   const tokenHeaders: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded',
   };
-
-  console.log('[OAuth Callback] Preparing auth header', {
-    hasClientSecret: !!clientSecret,
-    clientSecretLength: clientSecret?.length,
-    willAddAuthHeader: !!clientSecret,
-    clientIdPrefix: clientId?.substring(0, 10),
-    redirectUri
-  });
 
   if (clientSecret) {
     const basic = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     tokenHeaders.Authorization = `Basic ${basic}`;
-    console.log('[OAuth Callback] Authorization header set', {
-      authHeaderPrefix: tokenHeaders.Authorization.substring(0, 20)
-    });
   } else {
-    console.error('[OAuth Callback] X_CLIENT_SECRET is missing!');
+    console.warn('[Auth] X_CLIENT_SECRET not set — token exchange may fail for confidential apps');
   }
 
-  const tokenRes = await fetch('https://api.twitter.com/2/oauth2/token', {
-    method: 'POST',
-    headers: tokenHeaders,
-    body: tokenBody
-  });
+  console.log('[Auth] Exchanging code for token', { redirectUri });
 
-  console.log('[OAuth Callback] Token exchange', { status: tokenRes.status });
+  let tokenRes: Response;
+  try {
+    tokenRes = await fetch('https://api.twitter.com/2/oauth2/token', {
+      method: 'POST',
+      headers: tokenHeaders,
+      body: tokenBody,
+    });
+  } catch (err) {
+    console.error('[Auth] Network error reaching Twitter', err);
+    return redirectTo('/dashboard?error=network&detail=twitter_unreachable');
+  }
+
+  const tokenText = await tokenRes.text();
+  console.log('[Auth] Token exchange response', { status: tokenRes.status, body: tokenText });
 
   if (!tokenRes.ok) {
-    const errorText = await tokenRes.text();
-    console.error('[OAuth Callback] Token exchange failed', { status: tokenRes.status, error: errorText });
-    return redirectTo('/dashboard?error=token_failed');
+    const detail = encodeURIComponent(tokenText.slice(0, 200));
+    return redirectTo(`/dashboard?error=token_failed&detail=${detail}`);
   }
 
-  const tokenJson = await tokenRes.json() as { access_token?: string };
+  let tokenJson: { access_token?: string };
+  try {
+    tokenJson = JSON.parse(tokenText);
+  } catch {
+    return redirectTo('/dashboard?error=token_parse&detail=invalid_json');
+  }
+
   const accessToken = tokenJson.access_token;
   if (!accessToken) {
-    return redirectTo('/dashboard?error=token_missing');
+    return redirectTo('/dashboard?error=token_missing&detail=no_access_token');
   }
 
+  console.log('[Auth] Got access token, fetching user info');
+
   const userRes = await fetch('https://api.twitter.com/2/users/me', {
-    headers: { Authorization: `Bearer ${accessToken}` }
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (!userRes.ok) {
-    return redirectTo('/dashboard?error=user_failed');
+    const errText = await userRes.text();
+    console.error('[Auth] Failed to fetch user info', { status: userRes.status, body: errText });
+    return redirectTo(`/dashboard?error=user_failed&detail=${encodeURIComponent(errText.slice(0, 200))}`);
   }
 
   const userJson = await userRes.json() as { data?: { id: string; username: string } };
   const xUser = userJson.data;
+
   if (!xUser) {
-    return redirectTo('/dashboard?error=user_missing');
+    return redirectTo('/dashboard?error=user_missing&detail=no_user_data');
   }
 
+  console.log('[Auth] User identified', { username: xUser.username, xUserId: xUser.id });
+
   const agentId = xUser.username;
-  const existing = await getUserByXId(xUser.id);
-  const apiKey = existing?.apiKey;
-  const walletAddress = existing?.walletAddress;
-  const walletNo = existing?.walletNo;
 
-  await upsertUser({
-    xUserId: xUser.id,
-    xUsername: xUser.username,
-    agentId,
-    apiKey,
-    walletAddress,
-    walletNo,
-    createdAt: existing?.createdAt || Date.now(),
-    updatedAt: Date.now()
-  });
+  // Persist user record — non-fatal if GCS is not configured
+  try {
+    const existing = await getUserByXId(xUser.id);
+    await upsertUser({
+      xUserId: xUser.id,
+      xUsername: xUser.username,
+      agentId,
+      apiKey: existing?.apiKey,
+      walletAddress: existing?.walletAddress,
+      walletNo: existing?.walletNo,
+      createdAt: existing?.createdAt || Date.now(),
+      updatedAt: Date.now(),
+    });
+    console.log('[Auth] User record saved');
+  } catch (err) {
+    console.error('[Auth] Failed to save user record (non-fatal, GCS may not be configured)', err);
+  }
 
-  console.log('[OAuth Callback] User upserted, setting session cookie', {
-    xUserId: xUser.id,
-    username: xUser.username,
-    agentId
-  });
+  // Set session cookie
+  try {
+    setSessionCookie(cookieStore, {
+      xUserId: xUser.id,
+      username: xUser.username,
+      agentId,
+    });
+    console.log('[Auth] Session cookie set');
+  } catch (err) {
+    console.error('[Auth] Failed to set session cookie', err);
+    return redirectTo('/dashboard?error=session_failed&detail=check_auth_secret');
+  }
 
-  setSessionCookie(cookieStore, {
-    xUserId: xUser.id,
-    username: xUser.username,
-    agentId
-  });
-
+  // Clear PKCE cookies
   cookieStore.set('x_oauth_state', '', { path: '/', maxAge: 0 });
   cookieStore.set('x_oauth_verifier', '', { path: '/', maxAge: 0 });
 
-  console.log('[OAuth Callback] Redirecting to dashboard');
+  console.log('[Auth] Complete, redirecting to dashboard');
   return redirectTo('/dashboard');
 }
