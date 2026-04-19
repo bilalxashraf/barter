@@ -1,0 +1,31 @@
+{
+  "name": "barterpayments",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.11.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "db:generate": "pnpm --filter @barter/db exec drizzle-kit generate",
+    "db:migrate": "pnpm --filter @barter/db exec drizzle-kit migrate",
+    "db:push": "pnpm --filter @barter/db exec drizzle-kit push",
+    "db:studio": "pnpm --filter @barter/db exec drizzle-kit studio"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "drizzle-kit": "^0.30.6",
+    "tsup": "^8.4.0",
+    "tsx": "^4.20.3",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}

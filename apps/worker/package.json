@@ -1,0 +1,25 @@
+{
+  "name": "@barter/worker",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup --config tsup.config.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@barter/chains": "workspace:*",
+    "@barter/config": "workspace:*",
+    "@barter/contracts": "workspace:*",
+    "@barter/custody": "workspace:*",
+    "@barter/db": "workspace:*",
+    "@barter/domain": "workspace:*",
+    "@barter/observability": "workspace:*",
+    "@barter/social": "workspace:*",
+    "pg": "^8.14.1",
+    "pg-boss": "^10.1.6"
+  }
+}
