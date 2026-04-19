@@ -5,6 +5,7 @@ import XTimelineEmbed from "./components/XTimelineEmbed";
 import type { SiteMetrics } from "./_lib/siteMetrics.types";
 
 const numberFormatter = new Intl.NumberFormat("en-US");
+const METRICS_REFRESH_INTERVAL_MS = 15000;
 
 function WaitlistModal({
   onClose,
@@ -121,11 +122,12 @@ export default function Home() {
   useEffect(() => {
     let active = true;
 
-    async function loadMetrics() {
+    async function loadMetrics(methodOverride?: "GET" | "POST") {
       try {
         const hasTrackedVisit = sessionStorage.getItem("barter:visit-tracked") === "1";
+        const method = methodOverride || (hasTrackedVisit ? "GET" : "POST");
         const res = await fetch("/api/metrics", {
-          method: hasTrackedVisit ? "GET" : "POST",
+          method,
           cache: "no-store",
           credentials: "same-origin",
         });
@@ -135,7 +137,7 @@ export default function Home() {
         const data = (await res.json()) as { metrics?: SiteMetrics };
         if (!active || !data.metrics) return;
 
-        if (!hasTrackedVisit) {
+        if (method === "POST" && !hasTrackedVisit) {
           sessionStorage.setItem("barter:visit-tracked", "1");
         }
 
@@ -147,8 +149,24 @@ export default function Home() {
 
     loadMetrics();
 
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void loadMetrics("GET");
+      }
+    }, METRICS_REFRESH_INTERVAL_MS);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void loadMetrics("GET");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       active = false;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 

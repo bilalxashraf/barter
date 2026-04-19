@@ -185,19 +185,27 @@ async function readUserMetrics() {
 
 export async function getSiteMetrics(): Promise<SiteMetrics> {
   const existing = await readStoredMetrics();
-  const base = existing ?? defaultMetrics(await countWaitlistEntries());
+  const waitlistCount = await countWaitlistEntries();
+  const base = existing ? normalizeMetrics(existing, waitlistCount) : defaultMetrics(waitlistCount);
   const userMetrics = await readUserMetrics();
   const next: SiteMetrics = {
     ...base,
+    waitlistCount,
     ...userMetrics,
   };
 
   if (
     !existing ||
+    existing.waitlistCount !== next.waitlistCount ||
     existing.connectedXCount !== next.connectedXCount ||
     existing.solanaWalletUsersCount !== next.solanaWalletUsersCount
   ) {
-    await writeStoredMetrics(next);
+    const refreshed: SiteMetrics = {
+      ...next,
+      updatedAt: new Date().toISOString(),
+    };
+    await writeStoredMetrics(refreshed);
+    return refreshed;
   }
 
   return next;
