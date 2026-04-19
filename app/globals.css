@@ -3007,3 +3007,139 @@ body:has(main.bg-\[#020205\]) {
   background: #020205;
   color: #ffffff;
 }
+
+/* ── Dashboard black & white theme ─────────────────────────────────────────
+   Overrides the ignotus light design system for all pages that use
+   <main className="dashboard"> (/dashboard and /dashboard/chat).           */
+
+body:has(.dashboard) {
+  background: #000;
+  color: #fff;
+}
+
+.dashboard {
+  --bg: #000;
+  --bg-alt: #0a0a0a;
+  --ink: #ffffff;
+  --ink-subtle: rgba(255, 255, 255, 0.45);
+  --border: rgba(255, 255, 255, 0.09);
+  --card: #0a0a0a;
+  --accent-1: #ffffff;
+  --accent-2: #d4d4d4;
+  --accent-3: #a3a3a3;
+  --accent-4: #737373;
+  --gold: #d4d4d4;
+  --glow: rgba(255, 255, 255, 0.04);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.5);
+  background: #000;
+  color: #fff;
+}
+
+/* Nav */
+.dashboard .nav {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: #000;
+}
+.dashboard .nav-logo span { color: #fff; }
+.dashboard .nav-links a { color: rgba(255, 255, 255, 0.45); }
+.dashboard .nav-links a:hover { color: #fff; }
+.dashboard .nav-social { color: rgba(255, 255, 255, 0.4); }
+.dashboard .nav-social:hover { color: #fff; }
+.dashboard .nav-social svg { fill: currentColor; }
+
+/* Cards */
+.dashboard .card {
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.dashboard .card h4 { color: #fff; }
+.dashboard .card p  { color: rgba(255, 255, 255, 0.45); }
+.dashboard .muted   { color: rgba(255, 255, 255, 0.35); }
+
+/* Buttons */
+.dashboard .button.primary {
+  background: #fff;
+  color: #000;
+  border: none;
+}
+.dashboard .button.primary:hover { background: #e5e5e5; }
+.dashboard .button.secondary {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.dashboard .button.secondary:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Hero */
+.dashboard .page-hero h1 { color: #fff; }
+.dashboard .page-hero p  { color: rgba(255, 255, 255, 0.45); }
+
+/* Section backgrounds */
+.dashboard section { background: #000; }
+.dashboard .footer { background: #000; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.dashboard .footer-inner strong { color: rgba(255, 255, 255, 0.4); }
+
+/* Inputs */
+.dashboard input[type="text"],
+.dashboard input[type="email"],
+.dashboard textarea,
+.dashboard select {
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.dashboard input::placeholder { color: rgba(255, 255, 255, 0.25); }
+.dashboard input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+
+/* Wallet & misc */
+.dashboard .wallet-address { color: rgba(255, 255, 255, 0.7); font-family: monospace; }
+.dashboard .wallet-label,
+.dashboard .wallet-network,
+.dashboard .wallet-id { color: rgba(255, 255, 255, 0.4); }
+.dashboard .stat h3 { color: #fff; }
+.dashboard .stat p   { color: rgba(255, 255, 255, 0.4); }
+.dashboard .pill     { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+.dashboard .code-block {
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+.dashboard li { color: rgba(255, 255, 255, 0.6); }
+.dashboard strong { color: #fff; }
+.dashboard .docs-item { border-bottom-color: rgba(255, 255, 255, 0.07); }
+.dashboard .docs-item strong { color: #fff; }
+
+/* Status banner */
+.dashboard .status-banner {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Chat */
+.dashboard .chat-shell {
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.dashboard .chat-messages { background: #000; }
+.dashboard .chat-message-user   { background: #1a1a1a; color: #fff; }
+.dashboard .chat-message-agent  { background: #0a0a0a; color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.07); }
+.dashboard .chat-input-form     { background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.08); }
+.dashboard .chat-input          { background: #000; border: 1px solid rgba(255,255,255,0.12); color: #fff; }
+.dashboard .chat-submit         { background: #fff; color: #000; }
+.dashboard .chat-submit:hover   { background: #e5e5e5; }
+.dashboard .chat-example-button {
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+}
+.dashboard .chat-example-button:hover { border-color: rgba(255,255,255,0.2); color: #fff; }
