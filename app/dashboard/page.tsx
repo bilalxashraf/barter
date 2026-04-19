@@ -74,7 +74,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
   /* ── Not logged in ── */
   if (!session) {
     return (
-      <main style={S.page}>
+      <main className="dashboard" style={S.page}>
         <nav style={{ ...S.nav, maxWidth: '100%', padding: '16px 32px' }}>
           <a href="/" style={S.logo}>
             <div style={S.logoBox}>B</div>
@@ -173,7 +173,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
 
   /* ── Logged in UI ── */
   return (
-    <main style={S.page}>
+    <main className="dashboard" style={S.page}>
 
       {/* Nav */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
