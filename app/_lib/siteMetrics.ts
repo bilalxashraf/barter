@@ -1,18 +1,17 @@
 import crypto from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
-import { cloudCount, cloudObjectExists, cloudReadText, cloudWriteText, getCloudStoreKind } from "./cloudStore";
+import { cloudObjectExists, cloudReadText, cloudWriteText, getCloudStoreKind } from "./cloudStore";
 import type { SiteMetrics } from "./siteMetrics.types";
+import { countWaitlistEmails } from "./waitlistStore";
 import { listUsers } from "./xUserStore";
 
 const CLOUD_STORE = getCloudStoreKind();
 const DATA_DIR = path.join(process.cwd(), ".data");
 const LOCAL_METRICS_FILE = path.join(DATA_DIR, "site-metrics.json");
 const LOCAL_VISITOR_DIR = path.join(DATA_DIR, "visitors");
-const LOCAL_WAITLIST_FILE = path.join(process.cwd(), "waitlist.txt");
 const METRICS_BLOB_NAME = "metrics/site-summary.json";
 const VISITOR_PREFIX = "metrics/visitors/";
-const WAITLIST_PREFIX = "waitlist/";
 
 const BOT_PATTERNS = [
   "bot",
@@ -91,27 +90,6 @@ async function writeStoredMetrics(metrics: SiteMetrics): Promise<void> {
   await fs.writeFile(LOCAL_METRICS_FILE, JSON.stringify(metrics, null, 2), "utf8");
 }
 
-async function countWaitlistEntries(): Promise<number> {
-  if (CLOUD_STORE) {
-    try {
-      return await cloudCount(WAITLIST_PREFIX);
-    } catch (error) {
-      console.error("Waitlist metrics count error:", error);
-      return 0;
-    }
-  }
-
-  try {
-    const text = await fs.readFile(LOCAL_WAITLIST_FILE, "utf8");
-    return text
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean).length;
-  } catch {
-    return 0;
-  }
-}
-
 async function hasSeenVisitor(visitorId: string): Promise<boolean> {
   const visitorPath = `${VISITOR_PREFIX}${visitorId}.json`;
 
@@ -167,7 +145,7 @@ async function readUserMetrics() {
 
 export async function getSiteMetrics(): Promise<SiteMetrics> {
   const existing = await readStoredMetrics();
-  const waitlistCount = await countWaitlistEntries();
+  const waitlistCount = await countWaitlistEmails();
   const base = existing ? normalizeMetrics(existing, waitlistCount) : defaultMetrics(waitlistCount);
   const userMetrics = await readUserMetrics();
   const next: SiteMetrics = {
@@ -198,7 +176,7 @@ export async function getSiteMetrics(): Promise<SiteMetrics> {
 }
 
 export async function refreshWaitlistCount(): Promise<SiteMetrics> {
-  const waitlistCount = await countWaitlistEntries();
+  const waitlistCount = await countWaitlistEmails();
   const current = await getSiteMetrics();
   const next: SiteMetrics = {
     ...current,

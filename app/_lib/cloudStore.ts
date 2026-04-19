@@ -142,3 +142,37 @@ export async function cloudCount(prefix: string): Promise<number> {
 
   return 0;
 }
+
+export async function cloudListKeys(prefix: string): Promise<string[]> {
+  const kind = getCloudStoreKind();
+
+  if (kind === "gcs") {
+    const bucketName = process.env.GCS_BUCKET_NAME;
+    if (!bucketName) return [];
+
+    const [files] = await getStorageClient().bucket(bucketName).getFiles({ prefix });
+    return files.map((file) => file.name);
+  }
+
+  if (kind === "blob") {
+    const keys: string[] = [];
+    let cursor: string | undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const result = await list({ prefix, cursor });
+      for (const blob of result.blobs) {
+        const key = "pathname" in blob && typeof blob.pathname === "string"
+          ? blob.pathname
+          : new URL(blob.url).pathname.replace(/^\/+/, "");
+        keys.push(key);
+      }
+      cursor = result.cursor;
+      hasMore = result.hasMore;
+    }
+
+    return keys;
+  }
+
+  return [];
+}

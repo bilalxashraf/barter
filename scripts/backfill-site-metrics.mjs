@@ -10,6 +10,7 @@ const projectRoot = path.resolve(__dirname, "..");
 
 const METRICS_BLOB_NAME = "metrics/site-summary.json";
 const WAITLIST_PREFIX = "waitlist/";
+const LEGACY_WAITLIST_KEY = "waitlist.txt";
 const X_USERS_KEY = "x-users.json";
 const LOCAL_DATA_DIR = path.join(projectRoot, ".data");
 const LOCAL_METRICS_FILE = path.join(LOCAL_DATA_DIR, "site-metrics.json");
@@ -140,6 +141,39 @@ async function countCloudPrefix(prefix) {
   return 0;
 }
 
+async function listCloudKeys(prefix) {
+  const kind = getCloudStoreKind();
+
+  if (kind === "gcs") {
+    const bucketName = process.env.GCS_BUCKET_NAME;
+    if (!bucketName) return [];
+    const [files] = await getStorageClient().bucket(bucketName).getFiles({ prefix });
+    return files.map((file) => file.name);
+  }
+
+  if (kind === "blob") {
+    const keys = [];
+    let cursor;
+    let hasMore = true;
+
+    while (hasMore) {
+      const result = await list({ prefix, cursor });
+      for (const blob of result.blobs) {
+        const key = "pathname" in blob && typeof blob.pathname === "string"
+          ? blob.pathname
+          : new URL(blob.url).pathname.replace(/^\/+/, "");
+        keys.push(key);
+      }
+      cursor = result.cursor;
+      hasMore = result.hasMore;
+    }
+
+    return keys;
+  }
+
+  return [];
+}
+
 async function readLocalJson(filePath) {
   try {
     return JSON.parse(await fs.readFile(filePath, "utf8"));
@@ -174,22 +208,68 @@ async function readUsers() {
   return (await readLocalJson(path.join(LOCAL_DATA_DIR, X_USERS_KEY))) || [];
 }
 
-async function countWaitlistEntries() {
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+async function listLegacyWaitlistEmails() {
   const kind = getCloudStoreKind();
 
   if (kind) {
-    return countCloudPrefix(WAITLIST_PREFIX);
+    const text = await readCloudText(LEGACY_WAITLIST_KEY);
+    if (!text) return [];
+    return text
+      .split("\n")
+      .map((line) => normalizeEmail(line.split("\t")[0] || ""))
+      .filter(Boolean);
   }
 
   try {
     const text = await fs.readFile(LOCAL_WAITLIST_FILE, "utf8");
     return text
       .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean).length;
+      .map((line) => normalizeEmail(line.split("\t")[0] || ""))
+      .filter(Boolean);
   } catch {
-    return 0;
+    return [];
   }
+}
+
+async function listObjectWaitlistEmails() {
+  const kind = getCloudStoreKind();
+  if (!kind) return [];
+
+  const keys = await listCloudKeys(WAITLIST_PREFIX);
+  return keys
+    .map((key) => key.slice(WAITLIST_PREFIX.length))
+    .filter(Boolean)
+    .map((key) => key.replace(/\.txt$/i, ""))
+    .map(normalizeEmail)
+    .filter(Boolean);
+}
+
+async function countWaitlistEntries() {
+  const emails = new Set();
+
+  for (const email of await listLegacyWaitlistEmails()) {
+    emails.add(email);
+  }
+
+  for (const email of await listObjectWaitlistEmails()) {
+    emails.add(email);
+  }
+
+  if (emails.size > 0) {
+    return emails.size;
+  }
+
+  const kind = getCloudStoreKind();
+
+  if (kind) {
+    return countCloudPrefix(WAITLIST_PREFIX);
+  }
+
+  return 0;
 }
 
 async function writeMetrics(metrics) {
