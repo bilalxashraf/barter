@@ -3,7 +3,7 @@ import { getMarketplaceApiBaseUrl } from '../api/marketplace/_lib';
 type PricingModel = 'fixed' | 'quote' | 'subscription' | 'usage';
 type SupportedChain = 'solana' | 'base';
 
-type MarketplaceAgentProfile = {
+export type MarketplaceAgentProfile = {
   agentId: string;
   displayName: string;
   settlementChain: string;
@@ -33,9 +33,10 @@ type SyncMarketplaceAgentInput = {
   walletNo: number;
 };
 
-type SyncMarketplaceAgentResult = {
+export type SyncMarketplaceAgentResult = {
   state: 'created' | 'updated' | 'exists';
   profile: MarketplaceAgentProfile;
+  serviceCount: number;
 };
 
 function toErrorMessage(fallback: string, payload: any, status: number) {
@@ -146,6 +147,7 @@ export async function upsertMarketplaceAgentProfile(
   return {
     state: existingProfile ? 'updated' : 'created',
     profile: data.profile as MarketplaceAgentProfile,
+    serviceCount: Array.isArray(existingRecord?.services) ? existingRecord.services.length : 0,
   };
 }
 
@@ -157,6 +159,7 @@ export async function ensureMarketplaceAgentProfile(
     return {
       state: 'exists',
       profile: existingRecord.profile,
+      serviceCount: Array.isArray(existingRecord.services) ? existingRecord.services.length : 0,
     };
   }
 

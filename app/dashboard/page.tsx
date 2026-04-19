@@ -129,6 +129,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
   const activeSolanaWalletNo = activeSolanaWallet?.walletNo || 1;
   const isReady = record?.apiKey && (wallets.length > 0 || solanaWallets.length > 0);
   let marketplaceSyncError: string | null = null;
+  let marketplaceSyncResult: Awaited<ReturnType<typeof ensureMarketplaceAgentProfile>> | null = null;
 
   if (record?.apiKey) {
     const marketplaceWallet =
@@ -140,7 +141,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
 
     if (marketplaceWallet?.walletNo) {
       try {
-        await ensureMarketplaceAgentProfile({
+        marketplaceSyncResult = await ensureMarketplaceAgentProfile({
           agentId: session.agentId,
           apiKey: record.apiKey,
           username: session.username,
@@ -152,6 +153,23 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
       }
     }
   }
+
+  const marketplaceStatus = marketplaceSyncError
+    ? 'sync_error'
+    : marketplaceSyncResult
+      ? 'registered'
+      : record?.apiKey
+        ? 'pending_wallet'
+        : 'pending_api_key';
+
+  const marketplaceChain =
+    marketplaceSyncResult?.profile.settlementChain?.toUpperCase() ||
+    (activeSolanaWallet ? 'SOLANA' : activeWallet ? 'BASE' : undefined);
+  const marketplaceWalletNo =
+    marketplaceSyncResult?.profile.settlementWalletNo ||
+    activeSolanaWallet?.walletNo ||
+    activeWallet?.walletNo;
+  const marketplaceServiceCount = marketplaceSyncResult?.serviceCount ?? 0;
 
   /* ── Logged in UI ── */
   return (
@@ -297,6 +315,73 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           ) : (
             <div style={S.muted}>{record?.apiKey ? 'No Solana wallet yet — create one above.' : 'Create an API key first.'}</div>
           )}
+        </div>
+
+        {/* ── Marketplace status ── */}
+        <div style={{ ...S.card, marginBottom: 24 }}>
+          <div style={{ ...S.row, marginBottom: 12, alignItems: 'flex-start' }}>
+            <div>
+              <div style={S.label}>Marketplace Status</div>
+              <div style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 700 }}>
+                {marketplaceStatus === 'registered' && 'Registered'}
+                {marketplaceStatus === 'pending_wallet' && 'Pending wallet setup'}
+                {marketplaceStatus === 'pending_api_key' && 'Pending API key setup'}
+                {marketplaceStatus === 'sync_error' && 'Sync issue'}
+              </div>
+            </div>
+            <span
+              style={{
+                ...S.tag,
+                borderColor:
+                  marketplaceStatus === 'registered'
+                    ? 'rgba(80, 255, 160, 0.24)'
+                    : marketplaceStatus === 'sync_error'
+                      ? 'rgba(255, 184, 0, 0.28)'
+                      : 'rgba(255,255,255,0.15)',
+                color:
+                  marketplaceStatus === 'registered'
+                    ? 'rgba(140,255,190,0.95)'
+                    : marketplaceStatus === 'sync_error'
+                      ? 'rgba(255,210,120,0.95)'
+                      : 'rgba(255,255,255,0.75)',
+              }}
+            >
+              {marketplaceStatus === 'registered' ? 'live' : marketplaceStatus === 'sync_error' ? 'attention' : 'not live'}
+            </span>
+          </div>
+
+          {marketplaceStatus === 'registered' ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
+                <span style={S.tag}>{marketplaceChain}</span>
+                {marketplaceWalletNo ? <span style={S.tag}>Wallet {marketplaceWalletNo}</span> : null}
+                {marketplaceSyncResult?.state === 'created' ? <span style={S.tag}>Just created</span> : null}
+              </div>
+              <div style={S.muted}>
+                Marketplace profile is live for <strong style={{ color: '#fff' }}>{marketplaceSyncResult?.profile.displayName || `@${session.username}`}</strong>.
+              </div>
+              <div style={S.muted}>
+                {marketplaceServiceCount > 0
+                  ? `${marketplaceServiceCount} service${marketplaceServiceCount === 1 ? '' : 's'} published.`
+                  : 'No services published yet. This account is registered, but it will not appear in marketplace search until a service is published.'}
+              </div>
+            </>
+          ) : null}
+
+          {marketplaceStatus === 'pending_api_key' ? (
+            <div style={S.muted}>Create or save an API key first. Marketplace registration happens after the account has a key and a wallet.</div>
+          ) : null}
+
+          {marketplaceStatus === 'pending_wallet' ? (
+            <div style={S.muted}>Create either a Base or Solana wallet. The dashboard will register this account automatically as soon as a wallet exists.</div>
+          ) : null}
+
+          {marketplaceStatus === 'sync_error' ? (
+            <>
+              <div style={S.muted}>The account has the prerequisites, but the upstream marketplace registration call failed.</div>
+              <div style={S.muted}>{marketplaceSyncError}</div>
+            </>
+          ) : null}
         </div>
 
         {/* Payment links + Cards */}
