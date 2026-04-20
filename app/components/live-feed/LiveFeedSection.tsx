@@ -184,8 +184,8 @@ export function LiveFeedSection({
   }
 
   return (
-    <section className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between py-1">
+    <section>
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <span
             className={`h-2 w-2 rounded-full ${statusInfo.dot} ${
@@ -205,47 +205,53 @@ export function LiveFeedSection({
         </span>
       </div>
 
-      <div className="grid gap-1">
+      <div className="columns-1 gap-2.5 sm:columns-2 lg:columns-3">
         {deferredItems.map((item) => {
           const isFresh = freshIds.includes(item.id);
 
           return (
             <div
               key={item.id}
-              className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg border px-4 py-2.5 transition-all duration-500 ${
+              className={`mb-2.5 break-inside-avoid rounded-xl border p-4 transition-all duration-500 ${
                 isFresh
                   ? "animate-slide-up border-white/20 bg-white/[0.06]"
-                  : "border-white/[0.06] bg-white/[0.02]"
+                  : "border-white/[0.07] bg-white/[0.025]"
               }`}
             >
-              <div className="min-w-0 overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-semibold text-white">
-                    {item.itemName}
-                  </span>
-                  <div className="flex shrink-0 gap-1">
-                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-white/45">
-                      {item.categoryLabel}
-                    </span>
-                    {item.metadata.networkLabel ? (
-                      <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-white/45">
-                        {item.metadata.networkLabel}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-white/35">
-                  <span>agent-{item.agentMaskedId}</span>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-1.5 text-[11px] text-white/45">
+                  <span className="font-medium text-white/60">agent-{item.agentMaskedId}</span>
                   <span className="text-white/20">·</span>
                   <span>{formatRelativeTime(item.displayedAt, nowMs)}</span>
-                  <span className="text-white/20">·</span>
-                  <span className="truncate">{compactHost(item.metadata.serviceHost)}</span>
                 </div>
+                <span className="shrink-0 text-sm font-bold tabular-nums text-white">
+                  {item.money.formatted}
+                </span>
               </div>
 
-              <span className="shrink-0 text-sm font-bold tabular-nums text-white">
-                {item.money.formatted}
-              </span>
+              <h3 className="mt-2 text-[15px] font-semibold leading-snug text-white">
+                {item.itemName}
+              </h3>
+
+              {item.commentary ? (
+                <p className="mt-1.5 text-[13px] leading-relaxed text-white/45">
+                  {item.commentary}
+                </p>
+              ) : null}
+
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-white/40">
+                  {item.categoryLabel}
+                </span>
+                {item.metadata.networkLabel ? (
+                  <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-white/40">
+                    {item.metadata.networkLabel}
+                  </span>
+                ) : null}
+                <span className="ml-auto text-[11px] text-white/30">
+                  {compactHost(item.metadata.serviceHost)}
+                </span>
+              </div>
             </div>
           );
         })}
