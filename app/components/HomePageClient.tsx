@@ -218,22 +218,21 @@ export function HomePageClient({
 
       <section id="live-tape" className="scroll-mt-24">
         <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 lg:px-8">
-          <div className="mb-3 flex flex-col gap-2">
+          <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
                 <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
                 Live now
               </div>
-              <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
+              <h1 className="font-[var(--font-display)] text-base font-bold tracking-tight text-white sm:text-lg">
                 Real agents. Real spend. One surface.
               </h1>
             </div>
             {liveStats ? (
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
                   <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">24h</span>
                   <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(liveStats.totalItems24h)}</span>
-                  <span className="text-[10px] text-white/35">txns</span>
                 </div>
                 <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
                   <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">Vol</span>
