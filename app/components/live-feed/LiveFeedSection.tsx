@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  startTransition,
-  useDeferredValue,
-  useEffect,
-  useState,
-} from "react";
+import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import type {
   LiveFeedAppendEvent,
   LiveFeedItem,
@@ -19,13 +14,10 @@ import type {
 const numberFormatter = new Intl.NumberFormat("en-US");
 const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
-const statusCopy: Record<
-  LiveFeedStatus,
-  { label: string; dot: string }
-> = {
-  live: { label: "LIVE", dot: "bg-red-500" },
-  stale: { label: "IDLE", dot: "bg-yellow-500" },
-  fallback: { label: "DEMO", dot: "bg-blue-400" },
+const statusCopy: Record<LiveFeedStatus, { label: string; dot: string }> = {
+  live: { label: "Live", dot: "bg-white" },
+  stale: { label: "Idle", dot: "bg-white/55" },
+  fallback: { label: "Demo", dot: "bg-white/35" },
 };
 
 function formatRelativeTime(value: string, nowMs: number) {
@@ -36,9 +28,20 @@ function formatRelativeTime(value: string, nowMs: number) {
   const abs = Math.abs(deltaSeconds);
 
   if (abs < 60) return "just now";
-  if (abs < 3600) return relativeTimeFormatter.format(Math.round(deltaSeconds / 60), "minute");
-  if (abs < 86_400) return relativeTimeFormatter.format(Math.round(deltaSeconds / 3600), "hour");
+  if (abs < 3_600) return relativeTimeFormatter.format(Math.round(deltaSeconds / 60), "minute");
+  if (abs < 86_400) return relativeTimeFormatter.format(Math.round(deltaSeconds / 3_600), "hour");
   return relativeTimeFormatter.format(Math.round(deltaSeconds / 86_400), "day");
+}
+
+function compactHash(value: string | null) {
+  if (!value) return "Unavailable";
+  if (value.length <= 14) return value;
+  return `${value.slice(0, 6)}…${value.slice(-4)}`;
+}
+
+function compactHost(value: string | null) {
+  if (!value) return "Unknown service";
+  return value.replace(/^www\./, "");
 }
 
 function mergeItems(currentItems: LiveFeedItem[], incomingItems: LiveFeedItem[], limit: number) {
@@ -64,6 +67,7 @@ function parseEvent<T extends LiveFeedStreamEvent>(event: MessageEvent<string>) 
 
 export function LiveFeedSection({
   initialSnapshot,
+  onJoinWaitlist,
 }: {
   initialSnapshot: LiveFeedSnapshot;
   onJoinWaitlist: () => void;
@@ -172,123 +176,233 @@ export function LiveFeedSection({
   }, []);
 
   const statusInfo = statusCopy[snapshot.status];
+  const leadItem = deferredItems[0];
+  const trailItems = deferredItems.slice(1);
+  const leadIsFresh = leadItem ? freshIds.includes(leadItem.id) : false;
+
+  if (!leadItem) {
+    return (
+      <div className="flex h-full items-center justify-center rounded-[34px] border border-white/[0.08] bg-white/[0.03] p-10 text-white/48">
+        Waiting for live purchases…
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full flex-col bg-[#0e0e0e]">
-      {/* Twitch-style top bar */}
-      <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#18181b] px-5 py-2.5">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className={`h-2 w-2 rounded-full ${statusInfo.dot} ${snapshot.status === "live" ? "animate-pulse" : ""}`} />
-            <span className="text-[12px] font-bold uppercase tracking-wider text-red-400">
-              {statusInfo.label}
+    <section className="flex h-full flex-col rounded-[34px] border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.06),_transparent_35%),linear-gradient(180deg,_rgba(255,255,255,0.04),_rgba(255,255,255,0.02))]">
+      <div className="flex items-center justify-between border-b border-white/[0.08] px-6 py-4">
+        <div className="flex items-center gap-3">
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${statusInfo.dot} ${
+              snapshot.status === "live" ? "animate-pulse" : ""
+            }`}
+          />
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.22em] text-white/34">
+              {statusInfo.label} tape
+            </div>
+            <div className="mt-1 text-sm text-white/72">The latest purchase, updated in real time.</div>
+          </div>
+        </div>
+
+        <div className="text-right">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-white/28">
+            {transportState === "live" ? "Connected" : "Reconnecting"}
+          </div>
+          <div className="mt-1 text-sm text-white/72">
+            {numberFormatter.format(viewerCount)} watching now
+          </div>
+        </div>
+      </div>
+
+      <div className="grid flex-1 gap-4 p-5 xl:grid-cols-[minmax(0,1.05fr)_360px]">
+        <div
+          className={`rounded-[30px] border p-6 transition-all duration-300 ${
+            leadIsFresh
+              ? "border-white/20 bg-white/[0.08]"
+              : "border-white/[0.08] bg-white/[0.04]"
+          }`}
+        >
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-white/34">
+                Latest purchase
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-sm text-white/62">
+                <span>agent-{leadItem.agentMaskedId}</span>
+                <span className="text-white/20">•</span>
+                <span>{formatRelativeTime(leadItem.displayedAt, nowMs)}</span>
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-white/[0.08] bg-[#0c0c0d] px-5 py-4 text-right">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/30">Amount paid</div>
+              <div className="mt-2 text-3xl font-black tracking-tight text-white">
+                {leadItem.money.formatted}
+              </div>
+            </div>
+          </div>
+
+          <h2 className="mt-8 max-w-3xl font-[var(--font-display)] text-4xl font-black leading-[1.02] tracking-[-0.04em] text-white">
+            {leadItem.itemName}
+          </h2>
+
+          <p className="mt-4 max-w-3xl text-[15px] leading-8 text-white/54">
+            {leadItem.commentary || "A new x402 payment just landed on the tape."}
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <span className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-white/56">
+              {leadItem.categoryLabel}
+            </span>
+            {leadItem.metadata.networkLabel ? (
+              <span className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-white/56">
+                {leadItem.metadata.networkLabel}
+              </span>
+            ) : null}
+            <span className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-white/56">
+              {leadItem.sourceLabel}
             </span>
           </div>
-          <span className="text-[13px] font-medium text-white/70">Agent Commerce Stream</span>
-        </div>
 
-        <div className="flex items-center gap-5">
-          <div className="flex items-center gap-1.5 text-[12px] text-white/40">
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            <span>{viewerCount ? numberFormatter.format(viewerCount) : "0"}</span>
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[24px] border border-white/[0.08] bg-[#0c0c0d] p-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/28">Service</div>
+              <div className="mt-2 text-sm text-white/74">{compactHost(leadItem.metadata.serviceHost)}</div>
+            </div>
+            <div className="rounded-[24px] border border-white/[0.08] bg-[#0c0c0d] p-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/28">TX hash</div>
+              <div className="mt-2 text-sm text-white/74">{compactHash(leadItem.metadata.txHash)}</div>
+            </div>
+            <div className="rounded-[24px] border border-white/[0.08] bg-[#0c0c0d] p-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/28">Provider</div>
+              <div className="mt-2 text-sm text-white/74">{snapshot.stats.providerLabel}</div>
+            </div>
           </div>
-          <div className="text-[11px] text-white/25">
-            {transportState === "live" ? "Connected" : "Reconnecting..."}
-          </div>
-        </div>
-      </div>
 
-      {/* Stream stats bar */}
-      <div className="flex items-center gap-6 border-b border-white/[0.04] bg-[#131316] px-5 py-2">
-        <div className="text-[11px] text-white/25">
-          <span className="text-white/50">{numberFormatter.format(snapshot.stats.totalItems24h)}</span> txns/24h
-        </div>
-        <div className="text-[11px] text-white/25">
-          <span className="text-white/50">{numberFormatter.format(snapshot.stats.categories)}</span> categories
-        </div>
-        <div className="ml-auto text-[11px] text-white/20">
-          {snapshot.stats.providerLabel}
-        </div>
-      </div>
-
-      {/* Stream feed */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/8 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1">
-        <div className="space-y-1">
-          {deferredItems.map((item) => {
-            const isFresh = freshIds.includes(item.id);
-
-            return (
-              <div
-                key={item.id}
-                className={`group rounded-md px-3 py-2.5 transition-colors duration-300 ${
-                  isFresh
-                    ? "bg-white/[0.04]"
-                    : "hover:bg-white/[0.02]"
-                }`}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <button
+              onClick={onJoinWaitlist}
+              className="rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-black transition-all hover:bg-white/92"
+            >
+              Get early access
+            </button>
+            {leadItem.metadata.serviceUrl ? (
+              <a
+                href={leadItem.metadata.serviceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-white/12 bg-white/[0.03] px-5 py-2.5 text-[13px] font-medium text-white/76 transition-all hover:border-white/18 hover:bg-white/[0.05]"
               >
-                <div className="flex items-start gap-3">
-                  {/* Agent avatar */}
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded bg-white/[0.06] text-[9px] font-bold uppercase text-white/30">
-                    {item.agentMaskedId.slice(0, 2)}
-                  </div>
+                Open service ↗
+              </a>
+            ) : null}
+          </div>
+        </div>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-[12px] font-semibold text-white/50">
-                        agent-{item.agentMaskedId}
-                      </span>
-                      <span className="text-[10px] text-white/15">
-                        {formatRelativeTime(item.displayedAt, nowMs)}
-                      </span>
-                    </div>
+        <div className="flex h-full flex-col gap-4">
+          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+            <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.04] px-5 py-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/30">Transactions</div>
+              <div className="mt-2 text-2xl font-black text-white">
+                {numberFormatter.format(snapshot.stats.totalItems24h)}
+              </div>
+              <div className="mt-1 text-xs text-white/42">Seen in the last 24 hours</div>
+            </div>
+            <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.04] px-5 py-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/30">Categories</div>
+              <div className="mt-2 text-2xl font-black text-white">
+                {numberFormatter.format(snapshot.stats.categories)}
+              </div>
+              <div className="mt-1 text-xs text-white/42">Distinct purchase buckets</div>
+            </div>
+            <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.04] px-5 py-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/30">Viewers</div>
+              <div className="mt-2 text-2xl font-black text-white">
+                {numberFormatter.format(viewerCount)}
+              </div>
+              <div className="mt-1 text-xs text-white/42">Watching this tape now</div>
+            </div>
+          </div>
 
-                    <div className="mt-0.5 flex items-baseline gap-2">
-                      <span className="text-[13px] text-white/70">
-                        {item.itemName}
-                      </span>
-                      <span className="shrink-0 text-[12px] font-medium text-white/30">
-                        {item.money.formatted}
-                      </span>
-                    </div>
-
-                    {item.commentary && (
-                      <p className="mt-0.5 text-[11px] leading-5 text-white/20">
-                        {item.commentary}
-                      </p>
-                    )}
-
-                    <div className="mt-1 flex flex-wrap gap-1.5">
-                      <span className="rounded bg-white/[0.04] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-white/20">
-                        {item.categoryLabel}
-                      </span>
-                      {item.metadata.networkLabel && (
-                        <span className="rounded bg-white/[0.04] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-white/20">
-                          {item.metadata.networkLabel}
-                        </span>
-                      )}
-                      <span className="rounded bg-white/[0.04] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-white/20">
-                        {item.sourceLabel}
-                      </span>
-                    </div>
-                  </div>
+          <div className="flex min-h-0 flex-1 flex-col rounded-[30px] border border-white/[0.08] bg-white/[0.03]">
+            <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/30">
+                  Recent purchases
+                </div>
+                <div className="mt-1 text-sm text-white/68">
+                  The queue behind the latest transaction.
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/24">
+                Synced {formatRelativeTime(snapshot.fetchedAt, nowMs)}
+              </div>
+            </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-white/[0.04] bg-[#131316] px-5 py-2">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] text-white/15">
-            Synced {formatRelativeTime(snapshot.fetchedAt, nowMs)}
-          </span>
-          <span className="text-[10px] text-white/10">
-            barter payments
-          </span>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/8 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
+              <div className="space-y-3">
+                {trailItems.map((item) => {
+                  const isFresh = freshIds.includes(item.id);
+
+                  return (
+                    <article
+                      key={item.id}
+                      className={`rounded-[24px] border p-4 transition-all ${
+                        isFresh
+                          ? "border-white/18 bg-white/[0.07]"
+                          : "border-white/[0.08] bg-[#0c0c0d]"
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-[11px] font-semibold uppercase text-white/58">
+                          {item.agentMaskedId.slice(0, 2)}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2 text-[12px] text-white/42">
+                            <span className="font-medium text-white/64">agent-{item.agentMaskedId}</span>
+                            <span>•</span>
+                            <span>{formatRelativeTime(item.displayedAt, nowMs)}</span>
+                          </div>
+
+                          <div className="mt-2 flex items-start justify-between gap-4">
+                            <div className="min-w-0">
+                              <h3 className="truncate text-[15px] font-semibold text-white/88">
+                                {item.itemName}
+                              </h3>
+                              <p className="mt-1 text-[13px] leading-6 text-white/44">
+                                {item.commentary || "New x402 transaction recorded."}
+                              </p>
+                            </div>
+                            <div className="shrink-0 text-sm font-semibold text-white/72">
+                              {item.money.formatted}
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-white/48">
+                              {item.categoryLabel}
+                            </span>
+                            {item.metadata.networkLabel ? (
+                              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-white/48">
+                                {item.metadata.networkLabel}
+                              </span>
+                            ) : null}
+                            <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-white/48">
+                              {compactHost(item.metadata.serviceHost)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

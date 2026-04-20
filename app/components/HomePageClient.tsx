@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import type { SiteMetrics } from "@/app/_lib/siteMetrics.types";
 import { AgenticMarketplaceSection } from "@/app/components/agentic-marketplace/AgenticMarketplaceSection";
-import type { LiveFeedSnapshot } from "@/modules/live-feed/contracts";
-import type { AgenticMarketplaceSnapshot } from "@/modules/agentic-marketplace/contracts";
 import { WaitlistModal } from "@/app/components/WaitlistModal";
 import { LiveFeedSection } from "@/app/components/live-feed/LiveFeedSection";
+import type { AgenticMarketplaceSnapshot } from "@/modules/agentic-marketplace/contracts";
+import type { LiveFeedSnapshot } from "@/modules/live-feed/contracts";
 
 const numberFormatter = new Intl.NumberFormat("en-US");
 const metricsRefreshIntervalMs = 15_000;
@@ -15,24 +15,51 @@ const infraPillars = [
   {
     number: "01",
     title: "Payment rails for agents",
-    desc: "Protocol-level primitives that let any AI agent hold funds, authorize payments, and settle in real time — no human in the loop.",
+    desc: "Protocol-level primitives that let any AI agent hold funds, authorize payments, and settle in real time with minimal coordination.",
   },
   {
     number: "02",
-    title: "Identity & trust layer",
-    desc: "Verifiable agent identities anchored to wallets and on-chain credentials, so counterparties know who they're transacting with.",
+    title: "Identity and trust layer",
+    desc: "Verifiable agent identities anchored to wallets and credentials, so counterparties know who is paying and what they have paid for.",
   },
   {
     number: "03",
     title: "Settlement engine",
-    desc: "Multi-chain settlement that abstracts away bridging, gas, and finality. Agents pay in one call; Barter handles the rest.",
+    desc: "Multi-chain settlement that abstracts away bridging, gas, and finality. Agents pay once; Barter handles the operational complexity.",
   },
   {
     number: "04",
     title: "Commerce graph",
-    desc: "A live index of what agents buy, from whom, and at what price — the data layer powering discovery, pricing, and trust scores.",
+    desc: "A live index of what agents buy, from whom, and at what price. This is the data layer behind discovery, trust, and distribution.",
   },
 ];
+
+const sectionLinks = [
+  {
+    id: "live-tape",
+    label: "Live tape",
+    subtitle: "Real purchases in motion",
+    barWidth: "100%",
+  },
+  {
+    id: "marketplace",
+    label: "Marketplace",
+    subtitle: "Search x402 services",
+    barWidth: "84%",
+  },
+  {
+    id: "infrastructure",
+    label: "Infrastructure",
+    subtitle: "What powers it",
+    barWidth: "68%",
+  },
+  {
+    id: "metrics",
+    label: "Metrics",
+    subtitle: "Product proof",
+    barWidth: "54%",
+  },
+] as const;
 
 export function HomePageClient({
   initialLiveFeed,
@@ -43,6 +70,7 @@ export function HomePageClient({
 }) {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [metrics, setMetrics] = useState<SiteMetrics | null>(null);
+  const [activeSection, setActiveSection] = useState<(typeof sectionLinks)[number]["id"]>("live-tape");
 
   useEffect(() => {
     let active = true;
@@ -97,6 +125,33 @@ export function HomePageClient({
     };
   }, []);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+
+        if (visible?.target.id) {
+          setActiveSection(visible.target.id as (typeof sectionLinks)[number]["id"]);
+        }
+      },
+      {
+        rootMargin: "-18% 0px -58% 0px",
+        threshold: [0.15, 0.3, 0.5],
+      }
+    );
+
+    for (const section of sectionLinks) {
+      const element = document.getElementById(section.id);
+      if (element) observer.observe(element);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   const metricCards = [
     {
       value: metrics ? numberFormatter.format(metrics.totalVisits) : "—",
@@ -120,159 +175,210 @@ export function HomePageClient({
     },
   ];
 
+  const heroMetrics = [
+    {
+      value: numberFormatter.format(initialLiveFeed.stats.totalItems24h),
+      label: "transactions / 24h",
+    },
+    {
+      value: numberFormatter.format(initialMarketplace.stats.totalResources),
+      label: "services indexed",
+    },
+    {
+      value: numberFormatter.format(initialMarketplace.stats.distinctNetworks),
+      label: "networks visible",
+    },
+  ];
+
   return (
-    <main className="min-h-screen bg-[#111] text-white">
-      {/* Nav */}
-      <nav className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#111]/90 backdrop-blur-md">
-        <div className="flex items-center justify-between px-6 py-3 lg:px-10">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-white text-[11px] font-black text-black">
+    <main className="min-h-screen bg-[#0a0a0b] text-white">
+      <nav className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0a0a0b]/92 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white text-[11px] font-black text-black">
               B
             </div>
-            <span className="text-sm font-semibold tracking-tight text-white/90">Barter</span>
+            <div>
+              <div className="text-sm font-semibold tracking-tight text-white/92">Barter</div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/28">
+                Agentic commerce
+              </div>
+            </div>
           </div>
 
           <button
             onClick={() => setIsWaitlistOpen(true)}
-            className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-[13px] font-medium text-white/80 transition-all hover:bg-white/10 hover:text-white"
+            className="rounded-full border border-white/12 bg-white px-5 py-2 text-[13px] font-semibold text-black transition-all hover:bg-white/92"
           >
             Join waitlist
           </button>
         </div>
-      </nav>
 
-      {/* Hero: Horizontal layout */}
-      <div className="flex h-[calc(100vh-49px)]">
-        {/* Left: Messaging */}
-        <div className="flex w-[420px] shrink-0 flex-col justify-center border-r border-white/[0.06] px-10">
-          <div className="space-y-8">
-            <div>
-              <p className="mb-6 text-[11px] uppercase tracking-[0.25em] text-white/25">
-                AI Payments Infrastructure
-              </p>
-              <h1 className="text-[32px] font-bold leading-[1.15] tracking-tight text-white/90">
-                Human&apos;s first system was barter.
-              </h1>
-              <h1 className="mt-2 text-[32px] font-bold leading-[1.15] tracking-tight text-white/40">
-                It makes sense that agent&apos;s first one should be too.
-              </h1>
-            </div>
+        <div className="border-t border-white/[0.05]">
+          <div className="mx-auto flex max-w-7xl gap-3 overflow-x-auto px-5 py-3 sm:px-6 lg:px-8">
+            {sectionLinks.map((section) => {
+              const isActive = activeSection === section.id;
 
-            <p className="text-[14px] leading-7 text-white/30">
-              Agents are already buying tools, data, and compute. Barter puts the live tape, the
-              searchable storefront, and the payment rails in one place.
-            </p>
-
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => setIsWaitlistOpen(true)}
-                className="w-fit rounded-full bg-white/90 px-6 py-2.5 text-[13px] font-semibold text-black transition-all hover:bg-white"
-              >
-                Join the waitlist
-              </button>
-              <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-white/32">
-                <span className="rounded-full border border-white/10 px-3 py-1.5">
-                  Live agent purchases
-                </span>
-                <span className="rounded-full border border-white/10 px-3 py-1.5">
-                  Search x402 services
-                </span>
-                <span className="rounded-full border border-white/10 px-3 py-1.5">
-                  Zero-friction discovery
-                </span>
-              </div>
-            </div>
+              return (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className={`min-w-[170px] rounded-[20px] border px-4 py-3 transition-all ${
+                    isActive
+                      ? "border-white/20 bg-white/[0.08]"
+                      : "border-white/[0.08] bg-white/[0.02] hover:border-white/14 hover:bg-white/[0.04]"
+                  }`}
+                >
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/38">
+                    {section.label}
+                  </div>
+                  <div className="mt-1 text-sm text-white/72">{section.subtitle}</div>
+                  <div className="mt-3 h-1.5 rounded-full bg-white/[0.07]">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        isActive ? "bg-white" : "bg-white/38"
+                      }`}
+                      style={{ width: section.barWidth }}
+                    />
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </div>
+      </nav>
 
-        {/* Right: Twitch-style stream */}
-        <div className="flex-1 overflow-hidden">
-          <LiveFeedSection
-            initialSnapshot={initialLiveFeed}
-            onJoinWaitlist={() => setIsWaitlistOpen(true)}
-          />
+      <section id="live-tape" className="scroll-mt-32">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 lg:px-8">
+          <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+            <div className="rounded-[34px] border border-white/[0.08] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.09),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,0.05),_rgba(255,255,255,0.02))] p-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-white/58">
+                <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                Live now
+              </div>
+
+              <div className="mt-7">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/28">
+                  Barter for agentic commerce
+                </p>
+                <h1 className="mt-4 font-[var(--font-display)] text-[38px] font-black leading-[1.02] tracking-[-0.05em] text-white sm:text-[46px]">
+                  Real agents.
+                  <br />
+                  Real spend.
+                  <br />
+                  One surface.
+                </h1>
+                <p className="mt-5 max-w-md text-[15px] leading-8 text-white/52">
+                  Barter is the live tape, the storefront, and the payment layer for agentic
+                  commerce. Watch purchases happen, discover what agents can buy, and understand the
+                  rails underneath it.
+                </p>
+              </div>
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <button
+                  onClick={() => setIsWaitlistOpen(true)}
+                  className="rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-black transition-all hover:bg-white/92"
+                >
+                  Join the waitlist
+                </button>
+                <a
+                  href="#marketplace"
+                  className="rounded-full border border-white/12 bg-white/[0.03] px-5 py-2.5 text-[13px] font-medium text-white/78 transition-all hover:border-white/18 hover:bg-white/[0.05]"
+                >
+                  Explore the marketplace
+                </a>
+              </div>
+
+              <div className="mt-8 grid grid-cols-3 gap-3">
+                {heroMetrics.map((metric) => (
+                  <div
+                    key={metric.label}
+                    className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4"
+                  >
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/34">
+                      {metric.label}
+                    </div>
+                    <div className="mt-2 text-2xl font-black tracking-tight text-white">
+                      {metric.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <LiveFeedSection
+              initialSnapshot={initialLiveFeed}
+              onJoinWaitlist={() => setIsWaitlistOpen(true)}
+            />
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Below the fold */}
-      <div className="mx-auto max-w-6xl px-5 sm:px-6">
-        {/* Hackathon badge */}
-        <div className="pb-6 pt-20 text-[10px] uppercase tracking-[0.25em] text-white/20">
+      <div className="mx-auto max-w-7xl px-5 pb-24 sm:px-6 lg:px-8">
+        <div className="pb-8 text-[10px] uppercase tracking-[0.24em] text-white/22">
           Top 15 at India&apos;s first OpenCode hackathon
         </div>
 
-        {/* Infrastructure Vision */}
-        <section className="relative pb-28">
-          <div className="relative">
-            <div className="mb-4 inline-flex items-center gap-2.5 rounded-full border border-amber-400/15 bg-amber-400/[0.06] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/80">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.5)]" />
-              What&apos;s next
+        <div id="marketplace" className="scroll-mt-32">
+          <AgenticMarketplaceSection initialSnapshot={initialMarketplace} />
+        </div>
+
+        <section id="infrastructure" className="scroll-mt-32 pb-24">
+          <div className="mb-8 max-w-3xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-white/56">
+              What powers it
             </div>
-
-            <h2 className="mb-4 max-w-3xl font-[var(--font-display)] text-4xl font-black leading-[1.05] tracking-[-0.04em] text-white sm:text-5xl">
-              The underlying infrastructure
-              <br />
-              <span className="bg-gradient-to-r from-amber-200 via-white to-violet-300 bg-clip-text text-transparent">
-                for AI Payments.
-              </span>
+            <h2 className="font-[var(--font-display)] text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">
+              Infrastructure for agent-to-agent payments.
             </h2>
-
-            <p className="mb-14 max-w-2xl text-[15px] leading-8 text-white/45">
-              The live stream proves agents are already buying things. Now we&apos;re building the
-              payment rails they deserve — native settlement, verifiable identities, and a commerce
-              graph that makes agent-to-agent trade programmable from day one.
+            <p className="mt-4 max-w-2xl text-[15px] leading-8 text-white/46">
+              The live tape is the proof. The system behind it is native settlement, identity, and a
+              commerce graph that makes machine-to-machine trade understandable and programmable.
             </p>
+          </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="overflow-x-auto pb-2">
+            <div className="flex min-w-max gap-4">
               {infraPillars.map((pillar) => (
                 <div
                   key={pillar.number}
-                  className="group relative overflow-hidden rounded-[24px] border border-white/[0.07] bg-white/[0.02] p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.035]"
+                  className="w-[320px] rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
                 >
-                  <div className="absolute -right-6 -top-6 text-[72px] font-black leading-none text-white/[0.03] transition-all duration-300 group-hover:text-white/[0.05]">
-                    {pillar.number}
-                  </div>
-                  <div className="relative">
-                    <div className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white/25">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/30">
                       {pillar.number}
                     </div>
-                    <h3 className="mb-3 text-lg font-semibold tracking-tight text-white/90">
-                      {pillar.title}
-                    </h3>
-                    <p className="text-[13px] leading-7 text-white/40">{pillar.desc}</p>
+                    <div className="h-1.5 w-16 rounded-full bg-white/[0.08]">
+                      <div className="h-full w-10 rounded-full bg-white/40" />
+                    </div>
                   </div>
+                  <h3 className="text-xl font-semibold tracking-tight text-white/92">{pillar.title}</h3>
+                  <p className="mt-3 text-[14px] leading-7 text-white/44">{pillar.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Divider */}
-        <div className="mx-auto mb-24 h-px max-w-lg bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-        <AgenticMarketplaceSection initialSnapshot={initialMarketplace} />
-
-        <div className="mx-auto mb-24 h-px max-w-lg bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-        {/* Live Product Metrics */}
-        <section className="pb-24">
+        <section id="metrics" className="scroll-mt-32 pb-24">
           <div className="mb-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
             <div className="max-w-[52ch]">
-              <h2 className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/55">
+              <h2 className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/56">
                 Live product metrics
               </h2>
-              <p className="text-[13px] leading-7 text-white/30">
-                Real-time counters from the running product — visits, signups, connected accounts,
+              <p className="text-[14px] leading-7 text-white/42">
+                Real-time counters from the running product: visits, signups, connected accounts,
                 and provisioned wallets.
               </p>
             </div>
-            <p className="whitespace-nowrap pt-1 text-[11px] leading-none text-white/18 sm:text-right">
+            <p className="whitespace-nowrap pt-1 text-[11px] leading-none text-white/24 sm:text-right">
               {metrics
                 ? `Updated ${new Date(metrics.updatedAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}`
-                : "Loading live counters\u2026"}
+                : "Loading live counters…"}
             </p>
           </div>
 
@@ -280,12 +386,12 @@ export function HomePageClient({
             {metricCards.map((metric) => (
               <div
                 key={metric.label}
-                className="group flex min-h-[180px] flex-col justify-between rounded-[26px] border border-white/[0.06] bg-white/[0.015] p-6 transition-all duration-300 hover:border-white/[0.1] hover:bg-white/[0.025]"
+                className="flex min-h-[170px] flex-col justify-between rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
               >
-                <div className="text-4xl font-black leading-none tracking-tight text-white transition-transform duration-300 group-hover:translate-x-0.5">
+                <div className="text-4xl font-black leading-none tracking-tight text-white">
                   {metric.value}
                 </div>
-                <div className="max-w-[12ch] text-[10px] uppercase tracking-[0.18em] text-white/28">
+                <div className="max-w-[12ch] text-[10px] uppercase tracking-[0.18em] text-white/30">
                   {metric.label}
                 </div>
               </div>
@@ -294,26 +400,22 @@ export function HomePageClient({
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-white/[0.05]">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
+      <footer className="border-t border-white/[0.06]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
           <div className="flex items-center gap-2.5">
             <div className="flex h-5 w-5 items-center justify-center rounded-md bg-white text-[9px] font-black text-black">
               B
             </div>
-            <span className="text-[12px] text-white/25">Barter Payments &copy; {new Date().getFullYear()}</span>
+            <span className="text-[12px] text-white/28">
+              Barter Payments &copy; {new Date().getFullYear()}
+            </span>
           </div>
-          <div className="text-[12px] text-white/18">
-            AI Payments Infrastructure
-          </div>
+          <div className="text-[12px] text-white/28">Live tape. Storefront. Rails.</div>
         </div>
       </footer>
 
       {isWaitlistOpen ? (
-        <WaitlistModal
-          onClose={() => setIsWaitlistOpen(false)}
-          onMetricsChange={setMetrics}
-        />
+        <WaitlistModal onClose={() => setIsWaitlistOpen(false)} onMetricsChange={setMetrics} />
       ) : null}
     </main>
   );
