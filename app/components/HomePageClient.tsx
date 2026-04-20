@@ -192,8 +192,11 @@ export function HomePageClient({
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#0a0a0b] text-white">
+      <div className="border-b border-white/[0.06] bg-white/[0.02] py-1.5 text-center text-[10px] uppercase tracking-[0.24em] text-white/45">
+        Top 15 at India&apos;s first OpenCode hackathon
+      </div>
       <nav className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0a0a0b]/92 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white text-[11px] font-black text-black">
               B
@@ -215,7 +218,7 @@ export function HomePageClient({
         </div>
 
         <div className="border-t border-white/[0.05]">
-          <div className="mx-auto flex max-w-7xl gap-3 overflow-x-auto px-5 py-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-7xl gap-1.5 overflow-x-auto px-5 py-2 sm:px-6 lg:px-8">
             {sectionLinks.map((section) => {
               const isActive = activeSection === section.id;
 
@@ -223,24 +226,15 @@ export function HomePageClient({
                 <a
                   key={section.id}
                   href={`#${section.id}`}
-                  className={`min-w-[170px] rounded-[20px] border px-4 py-3 transition-all ${
+                  className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] transition-all ${
                     isActive
-                      ? "border-white/20 bg-white/[0.08]"
-                      : "border-white/[0.08] bg-white/[0.02] hover:border-white/14 hover:bg-white/[0.04]"
+                      ? "border-white/20 bg-white/[0.08] text-white"
+                      : "border-white/[0.06] text-white/50 hover:border-white/14 hover:text-white/72"
                   }`}
                 >
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">
                     {section.label}
-                  </div>
-                  <div className="mt-1 text-sm text-white/72">{section.subtitle}</div>
-                  <div className="mt-3 h-1.5 rounded-full bg-white/[0.07]">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        isActive ? "bg-white" : "bg-white/38"
-                      }`}
-                      style={{ width: section.barWidth }}
-                    />
-                  </div>
+                  </span>
                 </a>
               );
             })}
@@ -248,9 +242,9 @@ export function HomePageClient({
         </div>
       </nav>
 
-      <section id="live-tape" className="scroll-mt-32">
-        <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+      <section id="live-tape" className="scroll-mt-24">
+        <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 lg:px-8">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
                 <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
@@ -292,27 +286,21 @@ export function HomePageClient({
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-5 pb-24 sm:px-6 lg:px-8">
-        <div className="pb-8 text-[10px] uppercase tracking-[0.24em] text-white/45">
-          Top 15 at India&apos;s first OpenCode hackathon
-        </div>
-
-        <div id="marketplace" className="scroll-mt-32">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div id="marketplace" className="scroll-mt-24">
           <AgenticMarketplaceSection initialSnapshot={initialMarketplace} />
         </div>
 
-        <section id="infrastructure" className="scroll-mt-32 pb-24">
-          <div className="mb-8 max-w-3xl">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-white/56">
-              What powers it
+        <section id="infrastructure" className="scroll-mt-24 pt-8 pb-12">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-white/56">
+                What powers it
+              </div>
+              <h2 className="font-[var(--font-display)] text-xl font-bold tracking-tight text-white sm:text-2xl">
+                Infrastructure for agent-to-agent payments.
+              </h2>
             </div>
-            <h2 className="font-[var(--font-display)] text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">
-              Infrastructure for agent-to-agent payments.
-            </h2>
-            <p className="mt-4 max-w-2xl text-[15px] leading-8 text-white/46">
-              The live tape is the proof. The system behind it is native settlement, identity, and a
-              commerce graph that makes machine-to-machine trade understandable and programmable.
-            </p>
           </div>
 
           <div className="overflow-x-auto pb-2">
@@ -320,56 +308,45 @@ export function HomePageClient({
               {infraPillars.map((pillar) => (
                 <div
                   key={pillar.number}
-                  className="w-[320px] rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
+                  className="w-[280px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
                 >
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/48">
-                      {pillar.number}
-                    </div>
-                    <div className="h-1.5 w-16 rounded-full bg-white/[0.08]">
-                      <div className="h-full w-10 rounded-full bg-white/40" />
-                    </div>
+                  <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/48">
+                    {pillar.number}
                   </div>
-                  <h3 className="text-xl font-semibold tracking-tight text-white/92">{pillar.title}</h3>
-                  <p className="mt-3 text-[14px] leading-7 text-white/44">{pillar.desc}</p>
+                  <h3 className="text-sm font-semibold tracking-tight text-white/92">{pillar.title}</h3>
+                  <p className="mt-1.5 text-xs leading-5 text-white/44">{pillar.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="metrics" className="scroll-mt-32 pb-24">
-          <div className="mb-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
-            <div className="max-w-[52ch]">
-              <h2 className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/56">
-                Live product metrics
-              </h2>
-              <p className="text-[14px] leading-7 text-white/42">
-                Real-time counters from the running product: visits, signups, connected accounts,
-                and provisioned wallets.
-              </p>
-            </div>
-            <p className="whitespace-nowrap pt-1 text-[11px] leading-none text-white/45 sm:text-right">
+        <section id="metrics" className="scroll-mt-24 pt-8 pb-12">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/56">
+              Live product metrics
+            </h2>
+            <p className="text-[11px] text-white/45">
               {metrics
                 ? `Updated ${new Date(metrics.updatedAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}`
-                : "Loading live counters…"}
+                : "Loading…"}
             </p>
           </div>
 
-          <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             {metricCards.map((metric) => (
               <div
                 key={metric.label}
-                className="flex min-h-[170px] flex-col justify-between rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
+                className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 transition-all hover:border-white/[0.14]"
               >
-                <div className="text-4xl font-black leading-none tracking-tight text-white">
-                  {metric.value}
-                </div>
-                <div className="max-w-[12ch] text-[10px] uppercase tracking-[0.18em] text-white/48">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-white/48">
                   {metric.label}
+                </div>
+                <div className="text-xl font-bold tracking-tight text-white">
+                  {metric.value}
                 </div>
               </div>
             ))}
@@ -378,7 +355,7 @@ export function HomePageClient({
       </div>
 
       <footer className="border-t border-white/[0.06]">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 sm:flex-row">
           <div className="flex items-center gap-2.5">
             <div className="flex h-5 w-5 items-center justify-center rounded-md bg-white text-[9px] font-black text-black">
               B

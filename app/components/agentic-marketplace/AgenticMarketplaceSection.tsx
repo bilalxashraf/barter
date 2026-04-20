@@ -92,149 +92,86 @@ export function AgenticMarketplaceSection({
     };
   }, [category, deferredQuery, network]);
 
-  const programmaticUrl = useMemo(() => {
-    const params = new URLSearchParams();
-    params.set("limit", "5");
-    if (deferredQuery.trim()) params.set("q", deferredQuery.trim());
-    if (category !== "all") params.set("category", category);
-    if (network !== "all") params.set("network", network);
-    return `/api/agentic-marketplace/services?${params.toString()}`;
-  }, [category, deferredQuery, network]);
-
   return (
-    <section className="pb-24">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
+    <section className="pb-12">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
             <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
             Marketplace
           </div>
-          <h2 className="font-[var(--font-display)] text-xl font-bold tracking-tight text-white sm:text-2xl">
+          <h2 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white">
             Browse the commerce layer.
           </h2>
         </div>
-
-        <div className="flex gap-2">
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">Catalog</div>
-            <div className="mt-0.5 text-base font-bold text-white">
-              {numberFormatter.format(snapshot.stats.totalResources)}
-            </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-[11px] text-white/45">
+            <span>{numberFormatter.format(snapshot.stats.totalResources)} services</span>
+            <span className="text-white/25">·</span>
+            <span>{numberFormatter.format(snapshot.stats.visibleResults)} visible</span>
           </div>
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">Visible</div>
-            <div className="mt-0.5 text-base font-bold text-white">
-              {numberFormatter.format(snapshot.stats.visibleResults)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">Tape hits</div>
-            <div className="mt-0.5 text-base font-bold text-white">
-              {numberFormatter.format(snapshot.stats.liveTapeHits)}
-            </div>
-          </div>
+          <span className="text-[11px] text-white/30">
+            {status === "loading" ? "Refreshing…" : `Synced ${relativeTime(snapshot.fetchedAt)}`}
+          </span>
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
-          <div className="space-y-5">
-            <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase tracking-[0.18em] text-white/50">
-                Search services
-              </span>
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search data, social, trading, browser..."
-                className="rounded-2xl border border-white/[0.1] bg-[#0c0c0d] px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-white/20"
-              />
-            </label>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search services…"
+          className="w-48 rounded-lg border border-white/[0.1] bg-[#0c0c0d] px-3 py-1.5 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-white/20"
+        />
+        <select
+          value={category}
+          onChange={(event) => setCategory(event.target.value as AgenticMarketplaceCategory)}
+          className="rounded-lg border border-white/[0.1] bg-[#0c0c0d] px-3 py-1.5 text-sm text-white outline-none transition-all focus:border-white/20"
+        >
+          {categoryOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <select
+          value={network}
+          onChange={(event) => setNetwork(event.target.value)}
+          className="rounded-lg border border-white/[0.1] bg-[#0c0c0d] px-3 py-1.5 text-sm text-white outline-none transition-all focus:border-white/20"
+        >
+          <option value="all">All networks</option>
+          {networks.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <div className="flex gap-1">
+          {categoryOptions.slice(1).map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setCategory(option.value)}
+              className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all ${
+                category === option.value
+                  ? "border-white/18 bg-white/[0.08] text-white"
+                  : "border-white/[0.06] text-white/40 hover:border-white/14 hover:text-white/72"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-            <div className="grid gap-3">
-              <label className="flex flex-col gap-2">
-                <span className="text-[11px] uppercase tracking-[0.18em] text-white/50">Category</span>
-                <select
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value as AgenticMarketplaceCategory)}
-                  className="rounded-2xl border border-white/[0.1] bg-[#0c0c0d] px-4 py-3 text-sm text-white outline-none transition-all focus:border-white/20"
-                >
-                  {categoryOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="flex flex-col gap-2">
-                <span className="text-[11px] uppercase tracking-[0.18em] text-white/50">Network</span>
-                <select
-                  value={network}
-                  onChange={(event) => setNetwork(event.target.value)}
-                  className="rounded-2xl border border-white/[0.1] bg-[#0c0c0d] px-4 py-3 text-sm text-white outline-none transition-all focus:border-white/20"
-                >
-                  <option value="all">All networks</option>
-                  {networks.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {categoryOptions.slice(1).map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setCategory(option.value)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                    category === option.value
-                      ? "border-white/18 bg-white/[0.08] text-white"
-                      : "border-white/[0.08] bg-transparent text-white/48 hover:border-white/14 hover:text-white/72"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="rounded-[24px] border border-white/[0.08] bg-[#0c0c0d] p-4">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Zero friction</div>
-              <p className="mt-3 text-sm leading-7 text-white/48">
-                No accounts, no API keys, no separate discovery endpoint. Humans and agents hit the
-                same catalog.
-              </p>
-              <div className="mt-4 rounded-2xl border border-white/[0.08] bg-black/30 p-4 font-mono text-[11px] leading-6 text-white/74">
-                GET {programmaticUrl}
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <div className="min-w-0 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div>
-              <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Browse deck</div>
-              <div className="mt-1 text-sm text-white/66">
-                {status === "loading" ? "Refreshing services…" : `Synced ${relativeTime(snapshot.fetchedAt)}`}
-              </div>
-            </div>
-            <div className="text-right text-[11px] uppercase tracking-[0.18em] text-white/45">
-              {snapshot.stats.sourceLabel}
-            </div>
-          </div>
-
-          {snapshot.items.length ? (
-            <div className="grid gap-2">
-              {snapshot.items.map((item) => (
-                <a
-                  key={item.id}
-                  href={item.resourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-[#0c0c0d] px-4 py-3 transition-all hover:border-white/14 hover:bg-white/[0.04]"
+      {snapshot.items.length ? (
+        <div className="grid gap-1.5">
+          {snapshot.items.map((item) => (
+            <a
+              key={item.id}
+              href={item.resourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex items-center gap-4 rounded-xl border border-white/[0.06] bg-[#0c0c0d] px-4 py-2.5 transition-all hover:border-white/14 hover:bg-white/[0.04]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2.5">
@@ -272,13 +209,11 @@ export function AgenticMarketplaceSection({
                 </a>
               ))}
             </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-white/[0.08] px-6 py-10 text-center text-sm text-white/42">
-              No services matched. Broaden the query or reset filters.
-            </div>
-          )}
+      ) : (
+        <div className="rounded-xl border border-dashed border-white/[0.08] px-6 py-8 text-center text-sm text-white/42">
+          No services matched. Broaden the query or reset filters.
         </div>
-      </div>
+      )}
     </section>
   );
 }
