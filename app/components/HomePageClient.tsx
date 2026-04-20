@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { SiteMetrics } from "@/app/_lib/siteMetrics.types";
 import { AgenticMarketplaceSection } from "@/app/components/agentic-marketplace/AgenticMarketplaceSection";
 import { WaitlistModal } from "@/app/components/WaitlistModal";
-import { LiveFeedSection } from "@/app/components/live-feed/LiveFeedSection";
+import { LiveFeedSection, type LiveFeedLiveStats } from "@/app/components/live-feed/LiveFeedSection";
 import type { AgenticMarketplaceSnapshot } from "@/modules/agentic-marketplace/contracts";
 import type { LiveFeedSnapshot } from "@/modules/live-feed/contracts";
 
@@ -63,6 +63,8 @@ export function HomePageClient({
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [metrics, setMetrics] = useState<SiteMetrics | null>(null);
   const [activeSection, setActiveSection] = useState<(typeof sectionLinks)[number]["id"]>("live-tape");
+  const [liveStats, setLiveStats] = useState<LiveFeedLiveStats | null>(null);
+  const handleLiveStatsChange = useCallback((stats: LiveFeedLiveStats) => setLiveStats(stats), []);
 
   useEffect(() => {
     let active = true;
@@ -219,17 +221,38 @@ export function HomePageClient({
 
       <section id="live-tape" className="scroll-mt-24">
         <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 lg:px-8">
-          <div className="mb-3 flex items-center gap-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
-              <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-              Live now
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
+                <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                Live now
+              </div>
+              <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
+                Real agents. Real spend. One surface.
+              </h1>
             </div>
-            <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
-              Real agents. Real spend. One surface.
-            </h1>
+            {liveStats ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">24h</span>
+                  <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(liveStats.totalItems24h)}</span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">Vol</span>
+                  <span className="text-sm font-bold tabular-nums text-white">
+                    ${liveStats.accumulatedVolume > 0 ? liveStats.accumulatedVolume.toFixed(liveStats.accumulatedVolume < 1 ? 4 : 2) : "0"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                  <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(liveStats.viewerCount)}</span>
+                  <span className="text-[10px] text-white/35">watching</span>
+                </div>
+              </div>
+            ) : null}
           </div>
 
-          <LiveFeedSection initialSnapshot={initialLiveFeed} />
+          <LiveFeedSection initialSnapshot={initialLiveFeed} onStatsChange={handleLiveStatsChange} />
         </div>
       </section>
 

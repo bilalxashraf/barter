@@ -65,10 +65,27 @@ function parseEvent<T extends LiveFeedStreamEvent>(event: MessageEvent<string>) 
   }
 }
 
+export type LiveFeedLiveStats = {
+  totalItems24h: number;
+  accumulatedVolume: number;
+  viewerCount: number;
+  connected: boolean;
+};
+
+function computeItemsVolume(items: LiveFeedItem[]): number {
+  return items.reduce((sum, item) => {
+    const raw = item.money.rawAmount;
+    if (raw == null) return sum;
+    return sum + (item.money.scale === "usd-micros" ? raw / 1_000_000 : raw);
+  }, 0);
+}
+
 export function LiveFeedSection({
   initialSnapshot,
+  onStatsChange,
 }: {
   initialSnapshot: LiveFeedSnapshot;
+  onStatsChange?: (stats: LiveFeedLiveStats) => void;
 }) {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [viewerCount, setViewerCount] = useState(0);
@@ -77,6 +94,7 @@ export function LiveFeedSection({
   );
   const [freshIds, setFreshIds] = useState<string[]>([]);
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [accumulatedVolume, setAccumulatedVolume] = useState(() => computeItemsVolume(initialSnapshot.items));
   const deferredItems = useDeferredValue(snapshot.items);
 
   useEffect(() => {
@@ -95,10 +113,12 @@ export function LiveFeedSection({
     const handleSnapshot = (event: Event) => {
       const payload = parseEvent<LiveFeedSnapshotEvent>(event as MessageEvent<string>);
       if (payload?.type === "snapshot") {
+        const vol = computeItemsVolume(payload.snapshot.items);
         startTransition(() => {
           setSnapshot(payload.snapshot);
           setViewerCount(payload.viewerCount);
           setTransportState("live");
+          setAccumulatedVolume(vol);
         });
       }
     };
@@ -107,6 +127,7 @@ export function LiveFeedSection({
       const payload = parseEvent<LiveFeedAppendEvent>(event as MessageEvent<string>);
       if (payload?.type === "append") {
         const ids = payload.items.map((item) => item.id);
+        const newVolume = computeItemsVolume(payload.items);
 
         startTransition(() => {
           setSnapshot((current) => ({
@@ -117,6 +138,7 @@ export function LiveFeedSection({
           }));
           setViewerCount(payload.viewerCount);
           setTransportState("live");
+          setAccumulatedVolume((prev) => prev + newVolume);
           setFreshIds((current) => Array.from(new Set([...ids, ...current])).slice(0, 12));
         });
 
@@ -175,15 +197,14 @@ export function LiveFeedSection({
 
   const statusInfo = statusCopy[snapshot.status];
 
-  const totalVolume = deferredItems.reduce((sum, item) => {
-    const raw = item.money.rawAmount;
-    if (raw == null) return sum;
-    return sum + (item.money.scale === "usd-micros" ? raw / 1_000_000 : raw);
-  }, 0);
-
-  const volumeFormatted = totalVolume > 0
-    ? `$${totalVolume.toFixed(totalVolume < 1 ? 4 : 2)}`
-    : "$0";
+  useEffect(() => {
+    onStatsChange?.({
+      totalItems24h: snapshot.stats.totalItems24h,
+      accumulatedVolume,
+      viewerCount,
+      connected: transportState === "live",
+    });
+  }, [snapshot.stats.totalItems24h, accumulatedVolume, viewerCount, transportState, onStatsChange]);
 
   if (!deferredItems.length) {
     return (
@@ -195,31 +216,6 @@ export function LiveFeedSection({
 
   return (
     <section>
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
-            <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">24h</span>
-            <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(snapshot.stats.totalItems24h)}</span>
-            <span className="text-[10px] text-white/35">txns</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
-            <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">Volume</span>
-            <span className="text-sm font-bold tabular-nums text-white">{volumeFormatted}</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot} ${
-                snapshot.status === "live" ? "animate-pulse" : ""
-              }`}
-            />
-            <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(viewerCount)}</span>
-            <span className="text-[10px] text-white/35">watching</span>
-          </div>
-        </div>
-        <span className="text-[11px] text-white/30">
-          {transportState === "live" ? "Connected" : "Reconnecting…"}
-        </span>
-      </div>
 
       <div className="columns-1 gap-2.5 sm:columns-2 lg:columns-3">
         {deferredItems.map((item) => {
