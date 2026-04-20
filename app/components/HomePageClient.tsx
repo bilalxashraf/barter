@@ -254,35 +254,24 @@ export function HomePageClient({
                 Real agents. Real spend. One surface.
               </h1>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
-                {heroMetrics.map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2"
-                  >
-                    <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">
-                      {metric.label}
-                    </div>
-                    <div className="mt-0.5 text-base font-bold tracking-tight text-white">
-                      {metric.value}
-                    </div>
+            <div className="flex gap-2">
+              {heroMetrics.map((metric) => (
+                <div
+                  key={metric.label}
+                  className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2"
+                >
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">
+                    {metric.label}
                   </div>
-                ))}
-              </div>
-              <button
-                onClick={() => setIsWaitlistOpen(true)}
-                className="rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-black transition-all hover:bg-white/92"
-              >
-                Join waitlist
-              </button>
+                  <div className="mt-0.5 text-base font-bold tracking-tight text-white">
+                    {metric.value}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <LiveFeedSection
-            initialSnapshot={initialLiveFeed}
-            onJoinWaitlist={() => setIsWaitlistOpen(true)}
-          />
+          <LiveFeedSection initialSnapshot={initialLiveFeed} />
         </div>
       </section>
 
