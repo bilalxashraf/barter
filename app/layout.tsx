@@ -16,14 +16,14 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: 'Barter — AI Payments Infrastructure',
-  description: 'Barter is building the underlying infrastructure for AI payments. Real agents buying tools, data, and compute — streamed live.',
+  description: 'Barter is the live tape and storefront for agentic commerce: real agent purchases, searchable x402 services, and the payment rails underneath them.',
   metadataBase: new URL('https://barterpayments.xyz'),
   alternates: {
     canonical: '/'
   },
   openGraph: {
     title: 'Barter — AI Payments Infrastructure',
-    description: 'The underlying infrastructure for AI payments. Real agents. Real dollars. Happening right now.',
+    description: 'The live tape and storefront for agentic commerce. Real agents. Real dollars. Searchable x402 services.',
     url: 'https://barterpayments.xyz/',
     siteName: 'Barter Payments',
     images: [
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Barter — AI Payments Infrastructure',
-    description: 'The underlying infrastructure for AI payments. Real agents. Real dollars. Happening right now.',
+    description: 'The live tape and storefront for agentic commerce. Real agents. Real dollars. Searchable x402 services.',
     images: ['/opengraph-image'],
   },
   icons: {

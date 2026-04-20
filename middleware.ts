@@ -12,7 +12,13 @@ const PUBLIC_PAGE_PATHS = new Set([
   "/BarterPaymentLogo.png",
 ]);
 
-const PUBLIC_API_PREFIXES = ["/api/metrics", "/api/waitlist", "/api/x", "/api/live-feed"];
+const PUBLIC_API_PREFIXES = [
+  "/api/metrics",
+  "/api/waitlist",
+  "/api/x",
+  "/api/live-feed",
+  "/api/agentic-marketplace",
+];
 
 function isPublicApiPath(pathname: string) {
   return PUBLIC_API_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));

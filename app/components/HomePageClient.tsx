@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import type { SiteMetrics } from "@/app/_lib/siteMetrics.types";
+import { AgenticMarketplaceSection } from "@/app/components/agentic-marketplace/AgenticMarketplaceSection";
 import type { LiveFeedSnapshot } from "@/modules/live-feed/contracts";
+import type { AgenticMarketplaceSnapshot } from "@/modules/agentic-marketplace/contracts";
 import { WaitlistModal } from "@/app/components/WaitlistModal";
 import { LiveFeedSection } from "@/app/components/live-feed/LiveFeedSection";
 
@@ -34,8 +36,10 @@ const infraPillars = [
 
 export function HomePageClient({
   initialLiveFeed,
+  initialMarketplace,
 }: {
   initialLiveFeed: LiveFeedSnapshot;
+  initialMarketplace: AgenticMarketplaceSnapshot;
 }) {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [metrics, setMetrics] = useState<SiteMetrics | null>(null);
@@ -155,8 +159,8 @@ export function HomePageClient({
             </div>
 
             <p className="text-[14px] leading-7 text-white/30">
-              Agents are already buying tools, data, and compute.
-              We&apos;re building the native payment rails to make it seamless.
+              Agents are already buying tools, data, and compute. Barter puts the live tape, the
+              searchable storefront, and the payment rails in one place.
             </p>
 
             <div className="flex flex-col gap-3">
@@ -166,6 +170,17 @@ export function HomePageClient({
               >
                 Join the waitlist
               </button>
+              <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-white/32">
+                <span className="rounded-full border border-white/10 px-3 py-1.5">
+                  Live agent purchases
+                </span>
+                <span className="rounded-full border border-white/10 px-3 py-1.5">
+                  Search x402 services
+                </span>
+                <span className="rounded-full border border-white/10 px-3 py-1.5">
+                  Zero-friction discovery
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -233,6 +248,10 @@ export function HomePageClient({
         </section>
 
         {/* Divider */}
+        <div className="mx-auto mb-24 h-px max-w-lg bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+        <AgenticMarketplaceSection initialSnapshot={initialMarketplace} />
+
         <div className="mx-auto mb-24 h-px max-w-lg bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
         {/* Live Product Metrics */}
