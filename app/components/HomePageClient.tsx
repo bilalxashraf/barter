@@ -176,13 +176,10 @@ export function HomePageClient({
       </div>
       <nav className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0a0a0b]/92 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Barter" className="h-8 w-8 rounded-lg" />
-            <div>
-              <div className="text-sm font-semibold tracking-tight text-white/92">Barter</div>
-              <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
-                Agentic commerce
-              </div>
+          <div>
+            <div className="text-sm font-semibold tracking-tight text-white/92">Barter</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
+              Agentic commerce
             </div>
           </div>
 
@@ -308,7 +305,7 @@ export function HomePageClient({
       <footer className="border-t border-white/[0.06]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 sm:flex-row">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Barter" className="h-5 w-5 rounded" />
+            <span className="text-[12px] font-semibold text-white/45">Barter</span>
             <span className="text-[12px] text-white/45">
               Barter Payments &copy; {new Date().getFullYear()}
             </span>
