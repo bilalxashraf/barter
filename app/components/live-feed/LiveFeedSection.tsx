@@ -182,200 +182,172 @@ export function LiveFeedSection({
 
   if (!leadItem) {
     return (
-      <div className="flex h-full items-center justify-center rounded-[34px] border border-white/[0.08] bg-white/[0.03] p-10 text-white/48">
+      <div className="py-10 text-center text-sm text-white/48">
         Waiting for live purchases…
       </div>
     );
   }
 
   return (
-    <section className="flex h-full flex-col overflow-hidden rounded-[34px] border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.06),_transparent_35%),linear-gradient(180deg,_rgba(255,255,255,0.04),_rgba(255,255,255,0.02))]">
-      <div className="flex items-center justify-between border-b border-white/[0.08] px-6 py-4">
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span
-            className={`h-2.5 w-2.5 rounded-full ${statusInfo.dot} ${
+            className={`h-2 w-2 rounded-full ${statusInfo.dot} ${
               snapshot.status === "live" ? "animate-pulse" : ""
             }`}
           />
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-white/50">
-              {statusInfo.label} tape
-            </div>
-            <div className="mt-1 text-sm text-white/72">The latest purchase, updated in real time.</div>
-          </div>
+          <span className="text-[11px] uppercase tracking-[0.22em] text-white/50">
+            {statusInfo.label} tape
+          </span>
+          <span className="text-xs text-white/40">
+            {numberFormatter.format(viewerCount)} watching
+          </span>
         </div>
+        <span className="text-[11px] text-white/35">
+          {transportState === "live" ? "Connected" : "Reconnecting"}
+        </span>
+      </div>
 
-        <div className="text-right">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">
-            {transportState === "live" ? "Connected" : "Reconnecting"}
-          </div>
-          <div className="mt-1 text-sm text-white/72">
-            {numberFormatter.format(viewerCount)} watching now
-          </div>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+          <span className="text-[10px] uppercase tracking-[0.16em] text-white/48">Txns</span>
+          <span className="text-base font-bold text-white">{numberFormatter.format(snapshot.stats.totalItems24h)}</span>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+          <span className="text-[10px] uppercase tracking-[0.16em] text-white/48">Categories</span>
+          <span className="text-base font-bold text-white">{numberFormatter.format(snapshot.stats.categories)}</span>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+          <span className="text-[10px] uppercase tracking-[0.16em] text-white/48">Viewers</span>
+          <span className="text-base font-bold text-white">{numberFormatter.format(viewerCount)}</span>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.04] px-4 py-3">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Transactions</div>
-            <div className="mt-1.5 text-xl font-black text-white">
-              {numberFormatter.format(snapshot.stats.totalItems24h)}
+      <div
+        className={`rounded-xl border p-4 transition-all duration-300 ${
+          leadIsFresh
+            ? "border-white/20 bg-white/[0.06]"
+            : "border-white/[0.08] bg-white/[0.03]"
+        }`}
+      >
+        <div className="flex gap-5">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/50">
+              <span className="uppercase tracking-[0.2em]">Latest purchase</span>
+              <span className="text-white/30">·</span>
+              <span>agent-{leadItem.agentMaskedId}</span>
+              <span className="text-white/30">·</span>
+              <span>{formatRelativeTime(leadItem.displayedAt, nowMs)}</span>
             </div>
-            <div className="mt-1 text-xs text-white/42">Last 24h</div>
-          </div>
-          <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.04] px-4 py-3">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Categories</div>
-            <div className="mt-1.5 text-xl font-black text-white">
-              {numberFormatter.format(snapshot.stats.categories)}
+
+            <h2 className="mt-2 font-[var(--font-display)] text-lg font-bold leading-tight tracking-tight text-white">
+              {leadItem.itemName}
+            </h2>
+
+            <p className="mt-1.5 text-sm leading-6 text-white/50">
+              {leadItem.commentary || "A new x402 payment just landed on the tape."}
+            </p>
+
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/50">
+                {leadItem.categoryLabel}
+              </span>
+              {leadItem.metadata.networkLabel ? (
+                <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/50">
+                  {leadItem.metadata.networkLabel}
+                </span>
+              ) : null}
+              <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/50">
+                {leadItem.sourceLabel}
+              </span>
+              <span className="ml-auto text-sm font-bold text-white">{leadItem.money.formatted}</span>
             </div>
-            <div className="mt-1 text-xs text-white/42">Distinct buckets</div>
-          </div>
-          <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.04] px-4 py-3">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Viewers</div>
-            <div className="mt-1.5 text-xl font-black text-white">
-              {numberFormatter.format(viewerCount)}
+
+            <div className="mt-3 flex items-center gap-2 text-xs text-white/40">
+              <span>{compactHost(leadItem.metadata.serviceHost)}</span>
+              <span className="text-white/20">·</span>
+              <span>{snapshot.stats.providerLabel}</span>
             </div>
-            <div className="mt-1 text-xs text-white/42">Watching now</div>
           </div>
         </div>
 
-        <div
-          className={`rounded-[24px] border p-5 transition-all duration-300 ${
-            leadIsFresh
-              ? "border-white/20 bg-white/[0.08]"
-              : "border-white/[0.08] bg-white/[0.04]"
-          }`}
-        >
-          <div className="flex gap-6">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-3">
-                <div className="text-[11px] uppercase tracking-[0.2em] text-white/50">
-                  Latest purchase
-                </div>
-                <span className="text-white/40">•</span>
-                <span className="text-sm text-white/62">agent-{leadItem.agentMaskedId}</span>
-                <span className="text-sm text-white/62">{formatRelativeTime(leadItem.displayedAt, nowMs)}</span>
-              </div>
-
-              <h2 className="mt-3 font-[var(--font-display)] text-xl font-black leading-tight tracking-[-0.03em] text-white">
-                {leadItem.itemName}
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-white/54">
-                {leadItem.commentary || "A new x402 payment just landed on the tape."}
-              </p>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/56">
-                  {leadItem.categoryLabel}
-                </span>
-                {leadItem.metadata.networkLabel ? (
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/56">
-                    {leadItem.metadata.networkLabel}
-                  </span>
-                ) : null}
-                <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/56">
-                  {leadItem.sourceLabel}
-                </span>
-              </div>
-            </div>
-
-            <div className="hidden shrink-0 sm:flex sm:flex-col sm:gap-2">
-              <div className="rounded-[16px] border border-white/[0.08] bg-[#0c0c0d] px-4 py-3 text-right">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-white/48">Amount paid</div>
-                <div className="mt-1 text-lg font-black tracking-tight text-white">
-                  {leadItem.money.formatted}
-                </div>
-              </div>
-              <div className="rounded-[16px] border border-white/[0.08] bg-[#0c0c0d] px-4 py-2.5">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-white/48">Service</div>
-                <div className="mt-1 text-xs text-white/74">{compactHost(leadItem.metadata.serviceHost)}</div>
-              </div>
-              <div className="rounded-[16px] border border-white/[0.08] bg-[#0c0c0d] px-4 py-2.5">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-white/48">Provider</div>
-                <div className="mt-1 text-xs text-white/74">{snapshot.stats.providerLabel}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              onClick={onJoinWaitlist}
-              className="rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-black transition-all hover:bg-white/92"
+        <div className="mt-3 flex items-center gap-2 border-t border-white/[0.06] pt-3">
+          <button
+            onClick={onJoinWaitlist}
+            className="rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold text-black transition-all hover:bg-white/92"
+          >
+            Get early access
+          </button>
+          {leadItem.metadata.serviceUrl ? (
+            <a
+              href={leadItem.metadata.serviceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-white/12 px-4 py-1.5 text-[12px] font-medium text-white/70 transition-all hover:border-white/18 hover:bg-white/[0.04]"
             >
-              Get early access
-            </button>
-            {leadItem.metadata.serviceUrl ? (
-              <a
-                href={leadItem.metadata.serviceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full border border-white/12 bg-white/[0.03] px-4 py-2 text-[13px] font-medium text-white/76 transition-all hover:border-white/18 hover:bg-white/[0.05]"
-              >
-                Open service ↗
-              </a>
-            ) : null}
-          </div>
+              Open service ↗
+            </a>
+          ) : null}
+        </div>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between py-2">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-white/48">
+            Recent purchases
+          </span>
+          <span className="text-[11px] text-white/35">
+            Synced {formatRelativeTime(snapshot.fetchedAt, nowMs)}
+          </span>
         </div>
 
-        <div className="min-h-0 flex-1 rounded-[24px] border border-white/[0.08] bg-white/[0.03]">
-          <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-3">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">
-              Recent purchases
-            </div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">
-              Synced {formatRelativeTime(snapshot.fetchedAt, nowMs)}
-            </div>
-          </div>
+        <div className="overflow-x-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/8 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1.5">
+          <div className="flex min-w-max gap-2 pb-2 pr-2">
+            {trailItems.map((item) => {
+              const isFresh = freshIds.includes(item.id);
 
-          <div className="overflow-x-auto p-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/8 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1.5">
-            <div className="flex min-w-max gap-3 pr-3">
-              {trailItems.map((item) => {
-                const isFresh = freshIds.includes(item.id);
-
-                return (
-                  <article
-                    key={item.id}
-                    className={`w-[280px] shrink-0 rounded-[20px] border p-4 transition-all ${
-                      isFresh
-                        ? "border-white/18 bg-white/[0.07]"
-                        : "border-white/[0.08] bg-[#0c0c0d]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-[11px] text-white/50">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-[10px] font-semibold uppercase text-white/58">
-                          {item.agentMaskedId.slice(0, 2)}
-                        </div>
-                        <span className="font-medium text-white/64">agent-{item.agentMaskedId}</span>
+              return (
+                <article
+                  key={item.id}
+                  className={`w-[260px] shrink-0 rounded-xl border p-3 transition-all ${
+                    isFresh
+                      ? "border-white/18 bg-white/[0.06]"
+                      : "border-white/[0.08] bg-white/[0.03]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-[11px] text-white/50">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[9px] font-semibold uppercase text-white/58">
+                        {item.agentMaskedId.slice(0, 2)}
                       </div>
-                      <span className="text-sm font-semibold text-white/72">
-                        {item.money.formatted}
-                      </span>
+                      <span className="font-medium text-white/60">agent-{item.agentMaskedId}</span>
                     </div>
+                    <span className="text-xs font-semibold text-white/72">
+                      {item.money.formatted}
+                    </span>
+                  </div>
 
-                    <h3 className="mt-2.5 truncate text-sm font-semibold text-white/88">
-                      {item.itemName}
-                    </h3>
-                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/44">
-                      {item.commentary || "New x402 transaction recorded."}
-                    </p>
+                  <h3 className="mt-2 truncate text-sm font-semibold text-white/88">
+                    {item.itemName}
+                  </h3>
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/44">
+                    {item.commentary || "New x402 transaction recorded."}
+                  </p>
 
-                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
+                      {item.categoryLabel}
+                    </span>
+                    {item.metadata.networkLabel ? (
                       <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
-                        {item.categoryLabel}
+                        {item.metadata.networkLabel}
                       </span>
-                      {item.metadata.networkLabel ? (
-                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
-                          {item.metadata.networkLabel}
-                        </span>
-                      ) : null}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </div>

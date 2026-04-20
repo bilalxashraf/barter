@@ -191,7 +191,7 @@ export function HomePageClient({
   ];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#0a0a0b] text-white">
+    <main className="min-h-screen bg-[#0a0a0b] text-white">
       <div className="border-b border-white/[0.06] bg-white/[0.02] py-1.5 text-center text-[10px] uppercase tracking-[0.24em] text-white/45">
         Top 15 at India&apos;s first OpenCode hackathon
       </div>

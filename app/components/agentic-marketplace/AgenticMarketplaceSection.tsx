@@ -171,41 +171,33 @@ export function AgenticMarketplaceSection({
               href={item.resourceUrl}
               target="_blank"
               rel="noreferrer"
-              className="group flex items-center gap-4 rounded-xl border border-white/[0.06] bg-[#0c0c0d] px-4 py-2.5 transition-all hover:border-white/14 hover:bg-white/[0.04]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2.5">
-                      <h3 className="truncate text-sm font-semibold text-white">
-                        {item.title}
-                      </h3>
-                      <div className="flex shrink-0 gap-1.5">
-                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
-                          {item.categoryLabel}
-                        </span>
-                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
-                          {item.networkLabel}
-                        </span>
-                        {item.liveTapeMentions > 0 ? (
-                          <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/68">
-                            {item.liveTapeMentions}x live
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <p className="mt-1 truncate text-xs text-white/44">{item.description}</p>
+              className="group grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 overflow-hidden rounded-xl border border-white/[0.06] bg-[#0c0c0d] px-4 py-2.5 transition-all hover:border-white/14 hover:bg-white/[0.04]"
+            >
+              <div className="min-w-0 overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <h3 className="truncate text-sm font-semibold text-white">
+                    {item.title}
+                  </h3>
+                  <div className="flex shrink-0 gap-1.5">
+                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
+                      {item.categoryLabel}
+                    </span>
+                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
+                      {item.networkLabel}
+                    </span>
+                    {item.liveTapeMentions > 0 ? (
+                      <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/68">
+                        {item.liveTapeMentions}x live
+                      </span>
+                    ) : null}
                   </div>
+                </div>
+                <p className="mt-0.5 truncate text-xs text-white/44">{item.description}</p>
+              </div>
 
-                  <div className="hidden shrink-0 items-center gap-4 text-xs text-white/50 sm:flex">
-                    <span className="w-24 truncate text-white/60">{item.providerName}</span>
-                    <span className="w-12 text-center font-mono text-white/40">{item.method}</span>
-                    <span className="w-40 truncate font-mono text-white/40">{item.host}</span>
-                  </div>
+              <span className="shrink-0 text-xs font-semibold text-white">{item.priceLabel}</span>
 
-                  <div className="shrink-0 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-right">
-                    <div className="text-xs font-semibold text-white">{item.priceLabel}</div>
-                  </div>
-
-                  <span className="shrink-0 text-xs text-white/40 transition-colors group-hover:text-white/70">↗</span>
+              <span className="shrink-0 text-xs text-white/40 transition-colors group-hover:text-white/70">↗</span>
                 </a>
               ))}
             </div>
