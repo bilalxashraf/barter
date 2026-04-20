@@ -103,45 +103,41 @@ export function AgenticMarketplaceSection({
 
   return (
     <section className="pb-24">
-      <div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div className="max-w-3xl">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-white/60">
-            <span className="h-2 w-2 rounded-full bg-white/80" />
-            Agentic marketplace
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
+            Marketplace
           </div>
-          <h2 className="font-[var(--font-display)] text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">
-            Browse the commerce layer horizontally.
+          <h2 className="font-[var(--font-display)] text-xl font-bold tracking-tight text-white sm:text-2xl">
+            Browse the commerce layer.
           </h2>
-          <p className="mt-4 max-w-2xl text-[15px] leading-8 text-white/46">
-            Search live x402 services, inspect payment metadata, and browse the catalog like a
-            product shelf instead of a docs page.
-          </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">Catalog size</div>
-            <div className="mt-2 text-2xl font-black text-white">
+        <div className="flex gap-2">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">Catalog</div>
+            <div className="mt-0.5 text-base font-bold text-white">
               {numberFormatter.format(snapshot.stats.totalResources)}
             </div>
           </div>
-          <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">Visible now</div>
-            <div className="mt-2 text-2xl font-black text-white">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">Visible</div>
+            <div className="mt-0.5 text-base font-bold text-white">
               {numberFormatter.format(snapshot.stats.visibleResults)}
             </div>
           </div>
-          <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">Live tape hits</div>
-            <div className="mt-2 text-2xl font-black text-white">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">Tape hits</div>
+            <div className="mt-0.5 text-base font-bold text-white">
               {numberFormatter.format(snapshot.stats.liveTapeHits)}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="rounded-[32px] border border-white/[0.08] bg-white/[0.03] p-6">
+      <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
           <div className="space-y-5">
             <label className="flex flex-col gap-2">
               <span className="text-[11px] uppercase tracking-[0.18em] text-white/50">
@@ -217,7 +213,7 @@ export function AgenticMarketplaceSection({
           </div>
         </aside>
 
-        <div className="min-w-0 rounded-[32px] border border-white/[0.08] bg-white/[0.03] p-5">
+        <div className="min-w-0 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Browse deck</div>
@@ -231,84 +227,54 @@ export function AgenticMarketplaceSection({
           </div>
 
           {snapshot.items.length ? (
-            <div className="overflow-x-auto pb-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/8 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1.5">
-              <div className="flex min-w-max gap-4 pr-5">
-                {snapshot.items.map((item) => (
-                  <article
-                    key={item.id}
-                    className="flex w-[320px] shrink-0 flex-col rounded-[28px] border border-white/[0.08] bg-[#0c0c0d] p-5"
-                  >
-                    <div className="mb-4 flex flex-wrap gap-2">
-                      <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-white/48">
-                        {item.categoryLabel}
-                      </span>
-                      <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-white/48">
-                        {item.networkLabel}
-                      </span>
-                      {item.liveTapeMentions > 0 ? (
-                        <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-white/68">
-                          Seen live {item.liveTapeMentions}x
+            <div className="grid gap-2">
+              {snapshot.items.map((item) => (
+                <a
+                  key={item.id}
+                  href={item.resourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-[#0c0c0d] px-4 py-3 transition-all hover:border-white/14 hover:bg-white/[0.04]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5">
+                      <h3 className="truncate text-sm font-semibold text-white">
+                        {item.title}
+                      </h3>
+                      <div className="flex shrink-0 gap-1.5">
+                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
+                          {item.categoryLabel}
                         </span>
-                      ) : null}
-                    </div>
-
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <h3 className="font-[var(--font-display)] text-2xl leading-tight text-white">
-                          {item.title}
-                        </h3>
-                        {item.operationName ? (
-                          <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/48">
-                            {item.operationName}
-                          </div>
+                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/48">
+                          {item.networkLabel}
+                        </span>
+                        {item.liveTapeMentions > 0 ? (
+                          <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/68">
+                            {item.liveTapeMentions}x live
+                          </span>
                         ) : null}
                       </div>
-                      <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-right">
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Pricing</div>
-                        <div className="mt-2 text-sm font-semibold text-white">{item.priceLabel}</div>
-                      </div>
                     </div>
+                    <p className="mt-1 truncate text-xs text-white/44">{item.description}</p>
+                  </div>
 
-                    <p className="mt-4 text-sm leading-7 text-white/50">{item.description}</p>
+                  <div className="hidden shrink-0 items-center gap-4 text-xs text-white/50 sm:flex">
+                    <span className="w-24 truncate text-white/60">{item.providerName}</span>
+                    <span className="w-12 text-center font-mono text-white/40">{item.method}</span>
+                    <span className="w-40 truncate font-mono text-white/40">{item.host}</span>
+                  </div>
 
-                    <dl className="mt-5 grid gap-3 text-xs text-white/42">
-                      <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] pb-3">
-                        <dt className="uppercase tracking-[0.16em]">Provider</dt>
-                        <dd className="text-right text-white/64">{item.providerName}</dd>
-                      </div>
-                      <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] pb-3">
-                        <dt className="uppercase tracking-[0.16em]">Method</dt>
-                        <dd className="text-right text-white/64">{item.method}</dd>
-                      </div>
-                      <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] pb-3">
-                        <dt className="uppercase tracking-[0.16em]">Host</dt>
-                        <dd className="max-w-[180px] break-all text-right text-white/64">{item.host}</dd>
-                      </div>
-                      <div className="flex items-center justify-between gap-4">
-                        <dt className="uppercase tracking-[0.16em]">Mode</dt>
-                        <dd className="text-right text-white/64">
-                          {item.agentReady ? "Agent-readable" : "Browsable"}
-                        </dd>
-                      </div>
-                    </dl>
+                  <div className="shrink-0 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-right">
+                    <div className="text-xs font-semibold text-white">{item.priceLabel}</div>
+                  </div>
 
-                    <div className="mt-auto pt-5">
-                      <a
-                        href={item.resourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center rounded-full border border-white/[0.1] px-4 py-2 text-xs font-medium text-white/78 transition-all hover:border-white/18 hover:bg-white/[0.05]"
-                      >
-                        Open endpoint ↗
-                      </a>
-                    </div>
-                  </article>
-                ))}
-              </div>
+                  <span className="shrink-0 text-xs text-white/40 transition-colors group-hover:text-white/70">↗</span>
+                </a>
+              ))}
             </div>
           ) : (
-            <div className="rounded-[28px] border border-dashed border-white/[0.08] px-6 py-12 text-center text-sm text-white/42">
-              No services matched that filter set. Broaden the query or switch back to all categories.
+            <div className="rounded-2xl border border-dashed border-white/[0.08] px-6 py-10 text-center text-sm text-white/42">
+              No services matched. Broaden the query or reset filters.
             </div>
           )}
         </div>

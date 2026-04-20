@@ -249,69 +249,46 @@ export function HomePageClient({
       </nav>
 
       <section id="live-tape" className="scroll-mt-32">
-        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 lg:px-8">
-          <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-            <div className="overflow-hidden rounded-[34px] border border-white/[0.08] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.09),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,0.05),_rgba(255,255,255,0.02))] p-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-white/58">
+        <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
                 <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
                 Live now
               </div>
-
-              <div className="mt-7">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/50">
-                  Barter for agentic commerce
-                </p>
-                <h1 className="mt-4 font-[var(--font-display)] text-[38px] font-black leading-[1.02] tracking-[-0.05em] text-white sm:text-[46px]">
-                  Real agents.
-                  <br />
-                  Real spend.
-                  <br />
-                  One surface.
-                </h1>
-                <p className="mt-5 max-w-md text-[15px] leading-8 text-white/52">
-                  Barter is the live tape, the storefront, and the payment layer for agentic
-                  commerce. Watch purchases happen, discover what agents can buy, and understand the
-                  rails underneath it.
-                </p>
-              </div>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <button
-                  onClick={() => setIsWaitlistOpen(true)}
-                  className="rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-black transition-all hover:bg-white/92"
-                >
-                  Join the waitlist
-                </button>
-                <a
-                  href="#marketplace"
-                  className="rounded-full border border-white/12 bg-white/[0.03] px-5 py-2.5 text-[13px] font-medium text-white/78 transition-all hover:border-white/18 hover:bg-white/[0.05]"
-                >
-                  Explore the marketplace
-                </a>
-              </div>
-
-              <div className="mt-8 grid grid-cols-2 gap-3 xl:grid-cols-3">
+              <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
+                Real agents. Real spend. One surface.
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-2">
                 {heroMetrics.map((metric) => (
                   <div
                     key={metric.label}
-                    className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-3 py-3"
+                    className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2"
                   >
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">
                       {metric.label}
                     </div>
-                    <div className="mt-1.5 text-xl font-black tracking-tight text-white">
+                    <div className="mt-0.5 text-base font-bold tracking-tight text-white">
                       {metric.value}
                     </div>
                   </div>
                 ))}
               </div>
+              <button
+                onClick={() => setIsWaitlistOpen(true)}
+                className="rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-black transition-all hover:bg-white/92"
+              >
+                Join waitlist
+              </button>
             </div>
-
-            <LiveFeedSection
-              initialSnapshot={initialLiveFeed}
-              onJoinWaitlist={() => setIsWaitlistOpen(true)}
-            />
           </div>
+
+          <LiveFeedSection
+            initialSnapshot={initialLiveFeed}
+            onJoinWaitlist={() => setIsWaitlistOpen(true)}
+          />
         </div>
       </section>
 
