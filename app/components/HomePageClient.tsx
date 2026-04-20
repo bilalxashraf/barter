@@ -167,21 +167,6 @@ export function HomePageClient({
     },
   ];
 
-  const heroMetrics = [
-    {
-      value: numberFormatter.format(initialLiveFeed.stats.totalItems24h),
-      label: "transactions / 24h",
-    },
-    {
-      value: numberFormatter.format(initialMarketplace.stats.totalResources),
-      label: "services indexed",
-    },
-    {
-      value: numberFormatter.format(initialMarketplace.stats.distinctNetworks),
-      label: "networks visible",
-    },
-  ];
-
   return (
     <main className="min-h-screen bg-[#0a0a0b] text-white">
       <div className="border-b border-white/[0.06] bg-white/[0.02] py-1.5 text-center text-[10px] uppercase tracking-[0.24em] text-white/45">
@@ -236,31 +221,14 @@ export function HomePageClient({
 
       <section id="live-tape" className="scroll-mt-24">
         <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 lg:px-8">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
-                <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-                Live now
-              </div>
-              <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
-                Real agents. Real spend. One surface.
-              </h1>
+          <div className="mb-3 flex items-center gap-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
+              <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+              Live now
             </div>
-            <div className="flex gap-2">
-              {heroMetrics.map((metric) => (
-                <div
-                  key={metric.label}
-                  className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2"
-                >
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-white/50">
-                    {metric.label}
-                  </div>
-                  <div className="mt-0.5 text-base font-bold tracking-tight text-white">
-                    {metric.value}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
+              Real agents. Real spend. One surface.
+            </h1>
           </div>
 
           <LiveFeedSection initialSnapshot={initialLiveFeed} />

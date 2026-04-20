@@ -175,6 +175,16 @@ export function LiveFeedSection({
 
   const statusInfo = statusCopy[snapshot.status];
 
+  const totalVolume = deferredItems.reduce((sum, item) => {
+    const raw = item.money.rawAmount;
+    if (raw == null) return sum;
+    return sum + (item.money.scale === "usd-micros" ? raw / 1_000_000 : raw);
+  }, 0);
+
+  const volumeFormatted = totalVolume > 0
+    ? `$${totalVolume.toFixed(totalVolume < 1 ? 4 : 2)}`
+    : "$0";
+
   if (!deferredItems.length) {
     return (
       <div className="py-10 text-center text-sm text-white/48">
@@ -186,19 +196,25 @@ export function LiveFeedSection({
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span
-            className={`h-2 w-2 rounded-full ${statusInfo.dot} ${
-              snapshot.status === "live" ? "animate-pulse" : ""
-            }`}
-          />
-          <span className="text-xs text-white/40">
-            {numberFormatter.format(viewerCount)} watching
-          </span>
-          <span className="text-white/20">·</span>
-          <span className="text-xs text-white/35">
-            {numberFormatter.format(snapshot.stats.totalItems24h)} txns / 24h
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
+            <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">24h</span>
+            <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(snapshot.stats.totalItems24h)}</span>
+            <span className="text-[10px] text-white/35">txns</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
+            <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">Volume</span>
+            <span className="text-sm font-bold tabular-nums text-white">{volumeFormatted}</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot} ${
+                snapshot.status === "live" ? "animate-pulse" : ""
+              }`}
+            />
+            <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(viewerCount)}</span>
+            <span className="text-[10px] text-white/35">watching</span>
+          </div>
         </div>
         <span className="text-[11px] text-white/30">
           {transportState === "live" ? "Connected" : "Reconnecting…"}
