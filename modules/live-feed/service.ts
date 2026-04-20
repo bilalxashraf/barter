@@ -25,9 +25,12 @@ function getCache(): SnapshotCache {
   return globalThis.__barterLiveFeedCache;
 }
 
-function buildStats(items: LiveFeedItem[], providerLabel: string): LiveFeedStats {
+function buildStats(items: LiveFeedItem[], providerLabel: string, totalItems24hOverride?: number): LiveFeedStats {
   const categories = new Set(items.map((item) => item.category)).size;
   const newestTransactionAt = items.length ? items[0].transactionAt : null;
+
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const totalItems24h = totalItems24hOverride ?? items.filter((item) => Date.parse(item.transactionAt) >= cutoff).length;
 
   return {
     visibleItems: items.length,
@@ -35,6 +38,7 @@ function buildStats(items: LiveFeedItem[], providerLabel: string): LiveFeedStats
     newestTransactionAt,
     refreshCadenceMs: liveFeedConfig.pollIntervalMs,
     providerLabel,
+    totalItems24h,
   };
 }
 

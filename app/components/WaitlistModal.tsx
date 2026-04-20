@@ -55,9 +55,10 @@ export function WaitlistModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={(event) => event.target === event.currentTarget && onClose()}
     >
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
       <div className="relative w-full max-w-md animate-slide-up">
-        <div className="relative rounded-[28px] border border-white/10 bg-[#090b10] p-8 shadow-2xl">
+        <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#080a10] p-8 shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <button
             onClick={onClose}
             className="absolute right-4 top-4 text-2xl leading-none text-white/30 transition-colors hover:text-white/70"

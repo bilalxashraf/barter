@@ -15,15 +15,15 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Barter — Live Agent Commerce',
-  description: 'Barter pairs a public waitlist with a live stream of agents buying tools, data, and compute in real time.',
+  title: 'Barter — AI Payments Infrastructure',
+  description: 'Barter is building the underlying infrastructure for AI payments. Real agents buying tools, data, and compute — streamed live.',
   metadataBase: new URL('https://barterpayments.xyz'),
   alternates: {
     canonical: '/'
   },
   openGraph: {
-    title: 'Barter — Live Agent Commerce',
-    description: 'Real agents. Real dollars. Happening right now.',
+    title: 'Barter — AI Payments Infrastructure',
+    description: 'The underlying infrastructure for AI payments. Real agents. Real dollars. Happening right now.',
     url: 'https://barterpayments.xyz/',
     siteName: 'Barter Payments',
     images: [
@@ -31,15 +31,15 @@ export const metadata: Metadata = {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'Barter Payments — Live Agent Commerce',
+        alt: 'Barter — AI Payments Infrastructure',
       },
     ],
     type: 'website'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Barter — Live Agent Commerce',
-    description: 'Real agents. Real dollars. Happening right now.',
+    title: 'Barter — AI Payments Infrastructure',
+    description: 'The underlying infrastructure for AI payments. Real agents. Real dollars. Happening right now.',
     images: ['/opengraph-image'],
   },
   icons: {
@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Cloud',
     url: 'https://barterpayments.xyz',
-    description: "Live stream of agent commerce with public waitlist access for Barter's agentic payments beta.",
+    description: "Barter is building the underlying infrastructure for AI payments — native settlement, verifiable agent identity, and a live commerce graph.",
     offers: {
       '@type': 'Offer',
       price: '0',

@@ -5,12 +5,15 @@ import { getLiveFeedSnapshot } from "@/modules/live-feed/service";
 
 type Sink = (event: LiveFeedStreamEvent) => void;
 
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+
 class LiveFeedHub {
   private readonly sinks = new Map<string, Sink>();
   private readonly viewerIds = new Set<string>();
   private interval: ReturnType<typeof setInterval> | null = null;
   private currentSnapshot: LiveFeedSnapshot | null = null;
   private isRefreshing = false;
+  private readonly seenItems = new Map<string, number>();
 
   private broadcast(event: LiveFeedStreamEvent) {
     for (const sink of this.sinks.values()) {
@@ -21,7 +24,6 @@ class LiveFeedHub {
   private ensureStarted() {
     if (this.interval) return;
 
-    // This is intentionally in-process for now; the adapter boundary lets us swap to durable pub/sub later.
     this.interval = setInterval(() => {
       void this.refresh();
     }, liveFeedConfig.pollIntervalMs);
@@ -33,10 +35,38 @@ class LiveFeedHub {
     void this.refresh();
   }
 
+  private trackItems(snapshot: LiveFeedSnapshot) {
+    const now = Date.now();
+
+    for (const item of snapshot.items) {
+      if (!this.seenItems.has(item.id)) {
+        this.seenItems.set(item.id, now);
+      }
+    }
+
+    const cutoff = now - TWENTY_FOUR_HOURS_MS;
+    for (const [id, ts] of this.seenItems) {
+      if (ts < cutoff) {
+        this.seenItems.delete(id);
+      }
+    }
+  }
+
+  private patchStats(snapshot: LiveFeedSnapshot): LiveFeedSnapshot {
+    return {
+      ...snapshot,
+      stats: {
+        ...snapshot.stats,
+        totalItems24h: this.seenItems.size,
+      },
+    };
+  }
+
   async getSnapshot() {
     this.ensureStarted();
     this.currentSnapshot ||= await getLiveFeedSnapshot();
-    return this.currentSnapshot;
+    this.trackItems(this.currentSnapshot);
+    return this.patchStats(this.currentSnapshot);
   }
 
   getViewerCount() {
@@ -79,7 +109,11 @@ class LiveFeedHub {
     try {
       const previousIds = new Set(this.currentSnapshot?.items.map((item) => item.id) ?? []);
       const snapshot = await getLiveFeedSnapshot({ forceRefresh: true });
-      const appendedItems = snapshot.items.filter((item) => !previousIds.has(item.id));
+
+      this.trackItems(snapshot);
+
+      const patched = this.patchStats(snapshot);
+      const appendedItems = patched.items.filter((item) => !previousIds.has(item.id));
 
       this.currentSnapshot = snapshot;
 
@@ -87,18 +121,18 @@ class LiveFeedHub {
         this.broadcast({
           type: "append",
           items: appendedItems,
-          stats: snapshot.stats,
-          status: snapshot.status,
-          fetchedAt: snapshot.fetchedAt,
+          stats: patched.stats,
+          status: patched.status,
+          fetchedAt: patched.fetchedAt,
           viewerCount: this.viewerIds.size,
         });
       }
 
       this.broadcast({
         type: "pulse",
-        stats: snapshot.stats,
-        status: snapshot.status,
-        fetchedAt: snapshot.fetchedAt,
+        stats: patched.stats,
+        status: patched.status,
+        fetchedAt: patched.fetchedAt,
         viewerCount: this.viewerIds.size,
       });
     } finally {

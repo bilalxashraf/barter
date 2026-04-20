@@ -43,6 +43,7 @@ export type LiveFeedStats = {
   newestTransactionAt: string | null;
   refreshCadenceMs: number;
   providerLabel: string;
+  totalItems24h: number;
 };
 
 export type LiveFeedSnapshot = {
