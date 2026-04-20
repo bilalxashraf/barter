@@ -13,24 +13,16 @@ const metricsRefreshIntervalMs = 15_000;
 
 const infraPillars = [
   {
-    number: "01",
-    title: "Payment rails for agents",
-    desc: "Protocol-level primitives that let any AI agent hold funds, authorize payments, and settle in real time with minimal coordination.",
+    title: "Pay with a tweet",
+    desc: "An agent types a reply, sends a DM, or posts a comment — and the payment settles instantly. No checkout pages, no card forms. The conversation is the transaction.",
   },
   {
-    number: "02",
-    title: "Identity and trust layer",
-    desc: "Verifiable agent identities anchored to wallets and credentials, so counterparties know who is paying and what they have paid for.",
+    title: "Every agent gets a wallet",
+    desc: "Any AI agent can hold funds, authorize payments, and prove its identity on-chain. No human in the loop. No bank account needed. Just code that can spend.",
   },
   {
-    number: "03",
-    title: "Settlement engine",
-    desc: "Multi-chain settlement that abstracts away bridging, gas, and finality. Agents pay once; Barter handles the operational complexity.",
-  },
-  {
-    number: "04",
-    title: "Commerce graph",
-    desc: "A live index of what agents buy, from whom, and at what price. This is the data layer behind discovery, trust, and distribution.",
+    title: "One network, every chain",
+    desc: "Agents pay on Base, Solana, or any supported chain. Barter handles bridging, gas, and finality behind the scenes. The agent never thinks about infrastructure.",
   },
 ];
 
@@ -281,32 +273,22 @@ export function HomePageClient({
         </div>
 
         <section id="infrastructure" className="scroll-mt-24 pt-8 pb-12">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-white/56">
-                What powers it
-              </div>
-              <h2 className="font-[var(--font-display)] text-xl font-bold tracking-tight text-white sm:text-2xl">
-                Infrastructure for agent-to-agent payments.
-              </h2>
-            </div>
+          <div className="mb-5">
+            <h2 className="font-[var(--font-display)] text-xl font-bold tracking-tight text-white sm:text-2xl">
+              How it works
+            </h2>
           </div>
 
-          <div className="overflow-x-auto pb-2">
-            <div className="flex min-w-max gap-4">
-              {infraPillars.map((pillar) => (
-                <div
-                  key={pillar.number}
-                  className="w-[280px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
-                >
-                  <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/48">
-                    {pillar.number}
-                  </div>
-                  <h3 className="text-sm font-semibold tracking-tight text-white/92">{pillar.title}</h3>
-                  <p className="mt-1.5 text-xs leading-5 text-white/44">{pillar.desc}</p>
-                </div>
-              ))}
-            </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {infraPillars.map((pillar) => (
+              <div
+                key={pillar.title}
+                className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4"
+              >
+                <h3 className="text-sm font-bold text-white">{pillar.title}</h3>
+                <p className="mt-1.5 text-xs leading-5 text-white/50">{pillar.desc}</p>
+              </div>
+            ))}
           </div>
         </section>
 
