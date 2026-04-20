@@ -221,33 +221,24 @@ export function HomePageClient({
 
       <section id="live-tape" className="scroll-mt-24">
         <div className="mx-auto max-w-7xl px-5 py-4 sm:px-6 lg:px-8">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
-                <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-                Live now
-              </div>
-              <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
-                Real agents. Real spend. One surface.
-              </h1>
+          <div className="mb-3 flex items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/58">
+              <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+              Live now
             </div>
+            <h1 className="font-[var(--font-display)] text-lg font-bold tracking-tight text-white sm:text-xl">
+              Real agents. Real spend. One surface.
+            </h1>
             {liveStats ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
-                  <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">24h</span>
-                  <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(liveStats.totalItems24h)}</span>
-                </div>
-                <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
-                  <span className="text-[10px] uppercase tracking-[0.14em] text-white/45">Vol</span>
-                  <span className="text-sm font-bold tabular-nums text-white">
-                    ${liveStats.accumulatedVolume > 0 ? liveStats.accumulatedVolume.toFixed(liveStats.accumulatedVolume < 1 ? 4 : 2) : "0"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
+              <div className="ml-auto flex items-center gap-3 text-xs tabular-nums text-white/45">
+                <span><span className="font-bold text-white">{numberFormatter.format(liveStats.totalItems24h)}</span> txns/24h</span>
+                <span className="text-white/20">·</span>
+                <span><span className="font-bold text-white">${liveStats.accumulatedVolume > 0 ? liveStats.accumulatedVolume.toFixed(liveStats.accumulatedVolume < 1 ? 4 : 2) : "0"}</span> vol</span>
+                <span className="text-white/20">·</span>
+                <span className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                  <span className="text-sm font-bold tabular-nums text-white">{numberFormatter.format(liveStats.viewerCount)}</span>
-                  <span className="text-[10px] text-white/35">watching</span>
-                </div>
+                  <span className="font-bold text-white">{numberFormatter.format(liveStats.viewerCount)}</span> watching
+                </span>
               </div>
             ) : null}
           </div>
