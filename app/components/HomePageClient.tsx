@@ -191,7 +191,7 @@ export function HomePageClient({
   ];
 
   return (
-    <main className="min-h-screen bg-[#0a0a0b] text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#0a0a0b] text-white">
       <nav className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0a0a0b]/92 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
@@ -200,7 +200,7 @@ export function HomePageClient({
             </div>
             <div>
               <div className="text-sm font-semibold tracking-tight text-white/92">Barter</div>
-              <div className="text-[11px] uppercase tracking-[0.18em] text-white/28">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
                 Agentic commerce
               </div>
             </div>
@@ -229,7 +229,7 @@ export function HomePageClient({
                       : "border-white/[0.08] bg-white/[0.02] hover:border-white/14 hover:bg-white/[0.04]"
                   }`}
                 >
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/38">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
                     {section.label}
                   </div>
                   <div className="mt-1 text-sm text-white/72">{section.subtitle}</div>
@@ -251,14 +251,14 @@ export function HomePageClient({
       <section id="live-tape" className="scroll-mt-32">
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 lg:px-8">
           <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-            <div className="rounded-[34px] border border-white/[0.08] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.09),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,0.05),_rgba(255,255,255,0.02))] p-7">
+            <div className="overflow-hidden rounded-[34px] border border-white/[0.08] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.09),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,0.05),_rgba(255,255,255,0.02))] p-7">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-white/58">
                 <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
                 Live now
               </div>
 
               <div className="mt-7">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/28">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/50">
                   Barter for agentic commerce
                 </p>
                 <h1 className="mt-4 font-[var(--font-display)] text-[38px] font-black leading-[1.02] tracking-[-0.05em] text-white sm:text-[46px]">
@@ -290,16 +290,16 @@ export function HomePageClient({
                 </a>
               </div>
 
-              <div className="mt-8 grid grid-cols-3 gap-3">
+              <div className="mt-8 grid grid-cols-2 gap-3 xl:grid-cols-3">
                 {heroMetrics.map((metric) => (
                   <div
                     key={metric.label}
-                    className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4"
+                    className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-3 py-3"
                   >
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/34">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
                       {metric.label}
                     </div>
-                    <div className="mt-2 text-2xl font-black tracking-tight text-white">
+                    <div className="mt-1.5 text-xl font-black tracking-tight text-white">
                       {metric.value}
                     </div>
                   </div>
@@ -316,7 +316,7 @@ export function HomePageClient({
       </section>
 
       <div className="mx-auto max-w-7xl px-5 pb-24 sm:px-6 lg:px-8">
-        <div className="pb-8 text-[10px] uppercase tracking-[0.24em] text-white/22">
+        <div className="pb-8 text-[10px] uppercase tracking-[0.24em] text-white/45">
           Top 15 at India&apos;s first OpenCode hackathon
         </div>
 
@@ -346,7 +346,7 @@ export function HomePageClient({
                   className="w-[320px] rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
                 >
                   <div className="mb-4 flex items-center justify-between">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/48">
                       {pillar.number}
                     </div>
                     <div className="h-1.5 w-16 rounded-full bg-white/[0.08]">
@@ -372,7 +372,7 @@ export function HomePageClient({
                 and provisioned wallets.
               </p>
             </div>
-            <p className="whitespace-nowrap pt-1 text-[11px] leading-none text-white/24 sm:text-right">
+            <p className="whitespace-nowrap pt-1 text-[11px] leading-none text-white/45 sm:text-right">
               {metrics
                 ? `Updated ${new Date(metrics.updatedAt).toLocaleTimeString([], {
                     hour: "2-digit",
@@ -391,7 +391,7 @@ export function HomePageClient({
                 <div className="text-4xl font-black leading-none tracking-tight text-white">
                   {metric.value}
                 </div>
-                <div className="max-w-[12ch] text-[10px] uppercase tracking-[0.18em] text-white/30">
+                <div className="max-w-[12ch] text-[10px] uppercase tracking-[0.18em] text-white/48">
                   {metric.label}
                 </div>
               </div>
@@ -406,11 +406,11 @@ export function HomePageClient({
             <div className="flex h-5 w-5 items-center justify-center rounded-md bg-white text-[9px] font-black text-black">
               B
             </div>
-            <span className="text-[12px] text-white/28">
+            <span className="text-[12px] text-white/45">
               Barter Payments &copy; {new Date().getFullYear()}
             </span>
           </div>
-          <div className="text-[12px] text-white/28">Live tape. Storefront. Rails.</div>
+          <div className="text-[12px] text-white/45">Live tape. Storefront. Rails.</div>
         </div>
       </footer>
 

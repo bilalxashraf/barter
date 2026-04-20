@@ -120,19 +120,19 @@ export function AgenticMarketplaceSection({
 
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/32">Catalog size</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">Catalog size</div>
             <div className="mt-2 text-2xl font-black text-white">
               {numberFormatter.format(snapshot.stats.totalResources)}
             </div>
           </div>
           <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/32">Visible now</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">Visible now</div>
             <div className="mt-2 text-2xl font-black text-white">
               {numberFormatter.format(snapshot.stats.visibleResults)}
             </div>
           </div>
           <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03] px-5 py-4">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/32">Live tape hits</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">Live tape hits</div>
             <div className="mt-2 text-2xl font-black text-white">
               {numberFormatter.format(snapshot.stats.liveTapeHits)}
             </div>
@@ -144,20 +144,20 @@ export function AgenticMarketplaceSection({
         <aside className="rounded-[32px] border border-white/[0.08] bg-white/[0.03] p-6">
           <div className="space-y-5">
             <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase tracking-[0.18em] text-white/34">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-white/50">
                 Search services
               </span>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search data, social, trading, browser..."
-                className="rounded-2xl border border-white/[0.1] bg-[#0c0c0d] px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-white/22 focus:border-white/20"
+                className="rounded-2xl border border-white/[0.1] bg-[#0c0c0d] px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-white/20"
               />
             </label>
 
             <div className="grid gap-3">
               <label className="flex flex-col gap-2">
-                <span className="text-[11px] uppercase tracking-[0.18em] text-white/34">Category</span>
+                <span className="text-[11px] uppercase tracking-[0.18em] text-white/50">Category</span>
                 <select
                   value={category}
                   onChange={(event) => setCategory(event.target.value as AgenticMarketplaceCategory)}
@@ -172,7 +172,7 @@ export function AgenticMarketplaceSection({
               </label>
 
               <label className="flex flex-col gap-2">
-                <span className="text-[11px] uppercase tracking-[0.18em] text-white/34">Network</span>
+                <span className="text-[11px] uppercase tracking-[0.18em] text-white/50">Network</span>
                 <select
                   value={network}
                   onChange={(event) => setNetwork(event.target.value)}
@@ -205,7 +205,7 @@ export function AgenticMarketplaceSection({
             </div>
 
             <div className="rounded-[24px] border border-white/[0.08] bg-[#0c0c0d] p-4">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-white/30">Zero friction</div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Zero friction</div>
               <p className="mt-3 text-sm leading-7 text-white/48">
                 No accounts, no API keys, no separate discovery endpoint. Humans and agents hit the
                 same catalog.
@@ -217,26 +217,26 @@ export function AgenticMarketplaceSection({
           </div>
         </aside>
 
-        <div className="rounded-[32px] border border-white/[0.08] bg-white/[0.03] p-5">
+        <div className="min-w-0 rounded-[32px] border border-white/[0.08] bg-white/[0.03] p-5">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.18em] text-white/30">Browse deck</div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Browse deck</div>
               <div className="mt-1 text-sm text-white/66">
                 {status === "loading" ? "Refreshing services…" : `Synced ${relativeTime(snapshot.fetchedAt)}`}
               </div>
             </div>
-            <div className="text-right text-[11px] uppercase tracking-[0.18em] text-white/24">
+            <div className="text-right text-[11px] uppercase tracking-[0.18em] text-white/45">
               {snapshot.stats.sourceLabel}
             </div>
           </div>
 
           {snapshot.items.length ? (
             <div className="overflow-x-auto pb-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/8 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1.5">
-              <div className="flex min-w-max gap-4">
+              <div className="flex min-w-max gap-4 pr-5">
                 {snapshot.items.map((item) => (
                   <article
                     key={item.id}
-                    className="flex w-[360px] shrink-0 flex-col rounded-[28px] border border-white/[0.08] bg-[#0c0c0d] p-5"
+                    className="flex w-[320px] shrink-0 flex-col rounded-[28px] border border-white/[0.08] bg-[#0c0c0d] p-5"
                   >
                     <div className="mb-4 flex flex-wrap gap-2">
                       <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-white/48">
@@ -258,13 +258,13 @@ export function AgenticMarketplaceSection({
                           {item.title}
                         </h3>
                         {item.operationName ? (
-                          <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/30">
+                          <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/48">
                             {item.operationName}
                           </div>
                         ) : null}
                       </div>
                       <div className="rounded-[20px] border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-right">
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-white/28">Pricing</div>
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-white/48">Pricing</div>
                         <div className="mt-2 text-sm font-semibold text-white">{item.priceLabel}</div>
                       </div>
                     </div>
