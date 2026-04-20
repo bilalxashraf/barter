@@ -3006,6 +3006,11 @@ body:has(main.bg-\[#020205\]) {
   color: #ffffff;
 }
 
+body:has(main.bg-\[#111\]) {
+  background: #111;
+  color: #ffffff;
+}
+
 /* ── Dashboard black & white theme ─────────────────────────────────────────
    Overrides the ignotus light design system for all pages that use
    <main className="dashboard"> (/dashboard and /dashboard/chat).           */
